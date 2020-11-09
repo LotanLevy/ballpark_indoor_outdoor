@@ -51,11 +51,11 @@ def classification_architecture(input_size):
     prediction = tf.keras.layers.Dense(1, activation='softmax')(model.layers[-2].output)
     model = tf.keras.models.Model(inputs=model.input, outputs=prediction)
 
-    for layer in model.layers:
-        if layer.name == "block5_conv1":
-            break
-        else:
-            layer.trainable = False
+    # for layer in model.layers:
+    #     if layer.name == "block5_conv1":
+    #         break
+    #     else:
+    #         layer.trainable = False
 
     return model
 
