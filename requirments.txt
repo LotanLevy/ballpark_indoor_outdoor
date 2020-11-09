@@ -1,0 +1,5 @@
+tensorflow
+cvxpy==0.4.11
+CVXcanon==0.1.0
+scikit-learn
+pandas
