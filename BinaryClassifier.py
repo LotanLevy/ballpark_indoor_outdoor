@@ -48,14 +48,14 @@ def classification_architecture(input_size):
     # model.add(tf.keras.layers.Activation('sigmoid'))
 
     model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3), weights='imagenet')
-    # prediction = tf.keras.layers.Dense(1, activation='softmax')(model.layers[-2].output)
-    # model = tf.keras.models.Model(inputs=model.input, outputs=prediction)
+    prediction = tf.keras.layers.Dense(1, activation='softmax')(model.layers[-2].output)
+    model = tf.keras.models.Model(inputs=model.input, outputs=prediction)
 
-    # for layer in model.layers:
-    #     if layer.name == "block5_conv1":
-    #         break
-    #     else:
-    #         layer.trainable = False
+    for layer in model.layers:
+        if layer.name == "fc1":
+            break
+        else:
+            layer.trainable = False
 
     return model
 
@@ -79,7 +79,7 @@ def main():
     model = classification_architecture(args.input_size)
     print(model.summary())
     model.compile(loss='binary_crossentropy',
-              optimizer='rmsprop',
+              optimizer='adam',
               metrics=['accuracy'])
     history = model.fit(
         train_iter,
