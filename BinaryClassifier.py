@@ -27,35 +27,35 @@ def get_args_parser():
     return parser
 
 def classification_architecture(input_size):
-    model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), input_shape=(input_size, input_size, 3)))
-    model.add(tf.keras.layers.Activation('relu'))
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(tf.keras.layers.Conv2D(32, (3, 3)))
-    model.add(tf.keras.layers.Activation('relu'))
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(tf.keras.layers.Conv2D(64, (3, 3)))
-    model.add(tf.keras.layers.Activation('relu'))
-    model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(64))
-    model.add(tf.keras.layers.Activation('relu'))
-    model.add(tf.keras.layers.Dropout(0.5))
-    model.add(tf.keras.layers.Dense(1))
-    model.add(tf.keras.layers.Activation('sigmoid'))
-
-    # model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3), weights='imagenet')
-    # prediction = tf.keras.layers.Dense(1, activation='softmax')(model.layers[-2].output)
-    # model = tf.keras.models.Model(inputs=model.input, outputs=prediction)
+    # model = tf.keras.models.Sequential()
+    # model.add(tf.keras.layers.Conv2D(32, (3, 3), input_shape=(input_size, input_size, 3)))
+    # model.add(tf.keras.layers.Activation('relu'))
+    # model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
     #
-    # for layer in model.layers:
-    #     if layer.name == "fc1":
-    #         break
-    #     else:
-    #         layer.trainable = False
+    # model.add(tf.keras.layers.Conv2D(32, (3, 3)))
+    # model.add(tf.keras.layers.Activation('relu'))
+    # model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+    #
+    # model.add(tf.keras.layers.Conv2D(64, (3, 3)))
+    # model.add(tf.keras.layers.Activation('relu'))
+    # model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+    #
+    # model.add(tf.keras.layers.Flatten())
+    # model.add(tf.keras.layers.Dense(64))
+    # model.add(tf.keras.layers.Activation('relu'))
+    # model.add(tf.keras.layers.Dropout(0.5))
+    # model.add(tf.keras.layers.Dense(1))
+    # model.add(tf.keras.layers.Activation('sigmoid'))
+
+    model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3), weights='imagenet')
+    prediction = tf.keras.layers.Dense(1, activation='sigmoid')(model.layers[-2].output)
+    model = tf.keras.models.Model(inputs=model.input, outputs=prediction)
+
+    for layer in model.layers:
+        if layer.name == "fc1":
+            break
+        else:
+            layer.trainable = False
 
     return model
 
@@ -67,10 +67,10 @@ def main():
 
     vgg_preprocessing = lambda input_data: vgg16.preprocess_input(np.copy(input_data.astype('float32')))
 
-    train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1/255., zoom_range=0.2, shear_range=0.2, horizontal_flip=True)
+    train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=vgg_preprocessing, zoom_range=0.2, shear_range=0.2, horizontal_flip=True)
     train_iter = train_datagen.flow_from_directory(args.train_root_path, target_size=(args.input_size,args.input_size),
                                               batch_size=16, class_mode='binary', shuffle=True)
-    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1/255.)
+    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=vgg_preprocessing)
     val_iter = val_datagen.flow_from_directory(args.val_root_path, target_size=(args.input_size, args.input_size),
                                               batch_size=16, class_mode='binary')
 
@@ -79,7 +79,7 @@ def main():
     model = classification_architecture(args.input_size)
     print(model.summary())
     model.compile(loss='binary_crossentropy',
-              optimizer='adam',
+              optimizer='rmsprop',
               metrics=['accuracy'])
     history = model.fit(
         train_iter,
