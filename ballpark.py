@@ -20,7 +20,7 @@ def get_args_parser():
     parser.add_argument('--split_val',  type=int, default=0.2)
 
 
-    parser.add_argument('--labels_map_path',  type=str, required=True)
+    parser.add_argument('--labels_map_path',  type=str, default=None)
     parser.add_argument('--output_path', type=str, default=os.getcwd())
     return parser
 
@@ -51,7 +51,12 @@ def main():
     all_paths = []
     for bag_name, bag in val_bags.items():
         bag_preds, paths = make_predictions_for_bag(bag, w_t)
-        bag_labels = np.array([bag.path2label_dict[path] for path in paths])
+        if bag.path2label_dict is None:
+            bag_labels = np.ones(len(paths)) * bag.bag_label
+        else:
+            bag_labels = np.array([bag.path2label_dict[path] for path in paths])
+
+        # bag_labels = np.array([bag.path2label_dict[path] for path in paths])
         all_labels = np.concatenate((all_labels, bag_labels))
         all_preds = np.concatenate((all_preds, bag_preds))
         all_paths += paths

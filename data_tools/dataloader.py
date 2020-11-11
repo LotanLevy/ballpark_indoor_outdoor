@@ -57,7 +57,7 @@ class Dataloader:
         bags = dict()
         for cls_name, label in data_iter.class_indices.items():
             items_indices = np.where(data_iter.labels == label)[0]
-            bag = Bag(cls_name, data_iter, items_indices, self.input_size, self.paths2labels_dict)
+            bag = Bag(cls_name, data_iter, items_indices, self.input_size, bag_label=label, path2label_dict=self.paths2labels_dict)
             bags[cls_name] = bag
             # bag.display_bag()
         print("Bags names {}".format(bags.keys()))

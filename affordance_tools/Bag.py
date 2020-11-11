@@ -7,11 +7,12 @@ from PIL import Image
 
 
 class Bag:
-    def __init__(self, cls_name, data_iterator, cls_indices, input_size, path2label_dict=None):
+    def __init__(self, cls_name, data_iterator, cls_indices, input_size, bag_label, path2label_dict=None):
         self.cls_name = cls_name
         self.data_iterator = data_iterator
         self.cls_indices = cls_indices
         self.features_model = self.get_features_model(input_size)
+        self.bag_label = bag_label
         self.path2label_dict = path2label_dict
 
     def get_features_model(self, input_size):
