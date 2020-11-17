@@ -99,7 +99,7 @@ class BallparkModels:
         yhat = cp.Variable(self.data_size)  # +intercept
 
         constraints = []
-        loss = Constant(0)
+        loss = 0
 
         constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
