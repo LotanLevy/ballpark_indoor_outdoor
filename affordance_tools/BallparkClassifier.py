@@ -4,6 +4,7 @@ import cvxpy as cp
 import numpy as np
 import itertools
 from cvxpy.expressions.constants import Constant
+import os
 
 
 class BallparkClassifier:
@@ -140,7 +141,7 @@ class BallparkClassifier:
 
         P = []
         for pair, lower_bound in self.constraints_parser.cls2cls_diff_lower_bounds:
-            if lower_bound > 0:
+            if lower_bound >= 0:
                 P.append(pair)
 
         constraints = []
@@ -174,21 +175,29 @@ class BallparkClassifier:
         return w_0, prob.value
 
 
-    def solve_w_y(self, reg_val=10 ** -1, v=False):
-        wt_1, _ = self.get_w0()
-        c = 0
+    def solve_w_y(self, reg_val=10 ** -1, v=False, weights_path=None):
+        if weights_path is not None and os.path.exists(weights_path):
+            wt_1 = np.load(weights_path)
+        else:
+            wt_1, _ = self.get_w0(reg_val, v)
+        t = 0
         while(True):
             print(wt_1)
+            t += 1
+
             yt, _ = self.solve_y(wt_1, v=v)
             wt, _ = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
-            if np.dot(wt-wt_1, wt-wt_1) / np.dot(wt_1, wt_1) <= 10 **-5:
+            print(np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001))
+            if (np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)) <= 10 **-5:
+                print("exit")
                 return wt, yt, None
             else:
                 wt_1 = wt
 
-            c += 1
+                np.save(weights_path, wt)
 
-            print("{}: end of solve w_y iteration with distance {}".format(c, np.dot(wt - wt_1, wt - wt_1) / np.dot(wt_1, wt_1)))
+
+            print("{}: end of solve w_y iteration with distance {}".format(t, np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)))
 
 
 

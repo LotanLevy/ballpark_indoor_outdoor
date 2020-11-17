@@ -17,6 +17,8 @@ def get_args_parser():
     parser.add_argument('--constraints_file', '-cf',  type=str, required=True)
     parser.add_argument('--train_root_path',  type=str, required=True)
     parser.add_argument('--val_root_path',  type=str, required=True)
+    parser.add_argument('--cls_method',  action="store_true")
+
 
     parser.add_argument('--input_size',  type=int, default=224)
     parser.add_argument('--split_val',  type=int, default=0.2)
@@ -43,9 +45,10 @@ def main():
     val_bags = val_dataloader.split_into_bags(train=True)
 
     print("Initialize ballpark model")
-    b = BallparkModels(constraints, train_bags)
+    ballpark_object = BallparkClassifier if args.cls_method else BallparkModels
+    b = ballpark_object(constraints, train_bags)
     print("Start ballpark learning")
-    w_t, y_t, prob_value = b.solve_w_y()
+    w_t, y_t, prob_value = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
     np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
     w_t = np.load(os.path.join(args.output_path, "ballpark_weights.npy"))
     all_labels = np.array([])

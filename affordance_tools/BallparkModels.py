@@ -91,7 +91,7 @@ class BallparkModels:
         w_t = np.squeeze(np.asarray(np.copy(theta.value)))
         return w_t
 
-    def solve_w_y(self, reg_val=10**-1, v=False):
+    def solve_w_y(self, reg_val=10**-1, v=False, weights_path=None):
         if not self.legal_constraints:
             return None
         w = cp.Variable(self.features_num)  # +intercept
@@ -110,7 +110,6 @@ class BallparkModels:
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = bag.get_features()
-            print(bag_features.shape)
             loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
             if cls in self.constraints_parser.lower_bounds:
                 lower_bound = self.constraints_parser.lower_bounds[cls]

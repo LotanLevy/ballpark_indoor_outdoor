@@ -43,6 +43,7 @@ class Bag:
 
         # self.display_imagenet_prediction(self.cls_indices[0])
 
+
         for i in self.cls_indices:
             preprocessed_image = self.data_iterator[i][0]
             paths.append(self.data_iterator.filepaths[i])
