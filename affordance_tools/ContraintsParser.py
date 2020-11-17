@@ -39,6 +39,10 @@ class ConstraintsParser:
     def parse_line(self, line):
         try:
             lower, cls_name, upper = self.parse_range(line)
+            if lower is not None:
+                lower = float(lower)
+            if upper is not None:
+                upper = float(upper)
 
             # m_diff = re.match(self.DIFF_REGEX, cls_name)
             classes = cls_name.split("-")

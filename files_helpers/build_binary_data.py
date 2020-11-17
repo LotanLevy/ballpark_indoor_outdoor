@@ -5,10 +5,10 @@ output_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets"
 
 src_root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\scene_google"
 
-outdoor_classes = ["patio", "garden", "balcony", "chimney", "pool"]
-indoor_classes = ["kitchen", "bedroom", "sitting_area", "restaurant"]
+outdoor_classes = ["garden", "balcony"]
+indoor_classes = ["kitchen", "bedroom"]
 
-dest_dir_name = "binary_train_scene_google"
+dest_dir_name = "binary_small_train_scene_google"
 
 dest_dir = os.path.join(output_path, dest_dir_name)
 negatives_dir = os.path.join(dest_dir, "0")

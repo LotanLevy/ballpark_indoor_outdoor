@@ -3,6 +3,8 @@ import argparse
 import os
 from affordance_tools.ContraintsParser import ConstraintsParser
 from affordance_tools.BallparkModels import BallparkModels
+from affordance_tools.BallparkClassifier import BallparkClassifier
+
 from tensorflow.keras.applications import vgg16
 from data_tools.dataloader import Dataloader
 from sklearn.metrics import confusion_matrix
@@ -43,8 +45,8 @@ def main():
     print("Initialize ballpark model")
     b = BallparkModels(constraints, train_bags)
     print("Start ballpark learning")
-    # w_t, y_t, prob_value = b.solve_w_y()
-    # np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
+    w_t, y_t, prob_value = b.solve_w_y()
+    np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
     w_t = np.load(os.path.join(args.output_path, "ballpark_weights.npy"))
     all_labels = np.array([])
     all_preds = np.array([])

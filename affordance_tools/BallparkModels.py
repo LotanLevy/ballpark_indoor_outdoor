@@ -1,11 +1,17 @@
 import cvxpy as cp
 import numpy as np
+import itertools
+from cvxpy.expressions.constants import Constant
+
 
 
 class BallparkModels:
     def __init__(self, constraints_parser, bags_dict):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict
+
+
+
         assert len(self.bags_dict) > 0
 
         self.features_num = list(self.bags_dict.values())[0].features_model.layers[-1].output.shape[1]
@@ -93,7 +99,7 @@ class BallparkModels:
         yhat = cp.Variable(self.data_size)  # +intercept
 
         constraints = []
-        loss = 0
+        loss = Constant(0)
 
         constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
@@ -139,6 +145,11 @@ class BallparkModels:
         w_t = np.squeeze(np.asarray(np.copy(w.value)))
         y_t = np.squeeze(np.asarray(np.copy(yhat.value)))
         return w_t, y_t, prob.value
+
+    def solve_w0(self):
+        w = cp.Variable(self.features_num)  # +intercept
+
+
 
 
 
