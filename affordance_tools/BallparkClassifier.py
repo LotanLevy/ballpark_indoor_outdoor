@@ -72,7 +72,7 @@ class BallparkClassifier:
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = bag.get_features()
-            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], np.dot(bag_features * w))))
+            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
 
             # upper and lower constraints
