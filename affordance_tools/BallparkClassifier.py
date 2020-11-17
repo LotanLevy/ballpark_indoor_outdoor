@@ -72,7 +72,7 @@ class BallparkClassifier:
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = bag.get_features()
-            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
+            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features * w)))
 
 
             # upper and lower constraints
@@ -122,7 +122,7 @@ class BallparkClassifier:
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = bag.get_features()
-            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
+            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features * w)))
 
         prob = cp.Problem(cp.Minimize(loss / self.data_size + reg_val * reg))
 
@@ -162,7 +162,7 @@ class BallparkClassifier:
                 features_sum2 = np.sum(bag2_features, axis=1)
                 assert(len(features_sum1) == 4096)
 
-                constraints.append((1. / (len(bag1))) * features_sum1 @ w - (1. / (len(bag2))) * features_sum2 @ w >= psi[idx])
+                constraints.append((1. / (len(bag1))) * features_sum1 * w - (1. / (len(bag2))) * features_sum2 * w >= psi[idx])
 
 
         prob = cp.Problem(cp.Minimize(loss + reg_val * reg), constraints=constraints)
