@@ -1,0 +1,9 @@
+balcony <0.3
+bedroom > 0.7
+chimney < 0.4
+garden < 0.3
+kitchen > 0.7
+patio < 0.3
+pool < 0.3
+restaurant > 0.6
+sitting_area > 0.6
