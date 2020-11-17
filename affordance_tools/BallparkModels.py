@@ -99,7 +99,7 @@ class BallparkModels:
         yhat = cp.Variable(self.data_size)  # +intercept
 
         constraints = []
-        loss = 0
+        loss = Constant(0)
 
         constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
@@ -110,7 +110,7 @@ class BallparkModels:
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = bag.get_features()
-            loss += cp.sum_squares(bag_features@w-yhat[bag_indices])
+            loss += cp.sum_squares(np.dot(bag_features,w)-yhat[bag_indices])
             if cls in self.constraints_parser.lower_bounds:
                 lower_bound = self.constraints_parser.lower_bounds[cls]
             else:
