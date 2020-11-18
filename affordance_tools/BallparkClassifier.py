@@ -161,7 +161,7 @@ class BallparkClassifier:
                 features_sum2 = np.sum(bag2_features, axis=0)
                 assert(len(features_sum1) == 4096)
 
-                constraints.append((1. / (len(bag1))) * features_sum1 @ w - (1. / (len(bag2))) * features_sum2 @ w >= psi[idx])
+                constraints.append(((1. / (len(bag1))) * features_sum1 @ w) - ((1. / (len(bag2))) * features_sum2 @ w) >= psi[idx])
 
 
         prob = cp.Problem(cp.Minimize(loss + reg_val * reg), constraints=constraints)
@@ -171,6 +171,7 @@ class BallparkClassifier:
         except:
             prob.solve(solver="SCS")
         w_0 = np.squeeze(np.asarray(np.copy(w.value)))
+        print(w_0.shape)
         return w_0, prob.value
 
 
