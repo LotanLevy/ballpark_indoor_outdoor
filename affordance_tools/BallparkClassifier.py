@@ -135,21 +135,20 @@ class BallparkClassifier:
     def get_w0(self, reg_val=10 ** -1, v=False):
         w = cp.Variable(self.features_num)  # +intercept
         reg = cp.square(cp.norm(w, 2))
-        psi = cp.Variable(len(self.pairwise_bags))
-        loss = cp.sum(psi)
+
 
         P = []
         for pair, lower_bound in self.constraints_parser.cls2cls_diff_lower_bounds:
             if lower_bound >= 0:
                 P.append(pair)
 
+        psi = cp.Variable(len(self.pairwise_bags))
+        loss = cp.sum(psi) / len(P)
+
+        print(P)
+
         constraints = []
-        loss = 0
         if len(P) > 0:
-
-            loss = cp.sum(psi) / len(P)
-
-            psi = cp.Variable(len(P))
             for idx, pair in enumerate(P):
                 bag1, bag2 = self.bags_dict[pair[0]], self.bags_dict[pair[1]]
                 bag1_features, paths = bag1.get_features()
@@ -177,7 +176,7 @@ class BallparkClassifier:
 
     def solve_w_y(self, reg_val=10 ** -1, v=False, weights_path=None):
         if weights_path is not None and os.path.exists(weights_path + ".npy"):
-            wt_1 = np.load(weights_path)
+            wt_1 = np.load(weights_path+ ".npy")
         else:
             wt_1, _ = self.get_w0(reg_val, v)
         t = 0
