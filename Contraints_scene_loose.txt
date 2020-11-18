@@ -7,3 +7,11 @@ patio < 0.3
 pool < 0.3
 restaurant > 0.6
 sitting_area > 0.6
+bedroom - balcony > 0.1
+kitchen - balcony >0.1
+bedroom - garden > 0.1
+kitchen - garden > 0.1
+bedroom - pool > 0.1
+kitchen - pool > 0.1
+bedroom - sitting_area > 0.1
+kitchen - sitting_area > 0.1

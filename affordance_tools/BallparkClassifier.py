@@ -60,7 +60,6 @@ class BallparkClassifier:
     def solve_y(self, w, v=False):
 
         yhat = cp.Variable(self.data_size)  # +intercept
-        losses = cp.Variable(len(self.bags_dict))
 
         constraints = []
         loss = Constant(0)
@@ -156,10 +155,10 @@ class BallparkClassifier:
                 bag1_features, paths = bag1.get_features()
                 bag2_features, paths = bag2.get_features()
 
-                features_sum1 = np.sum(bag1_features, axis=1)
+                features_sum1 = np.sum(bag1_features, axis=0)
                 assert(len(features_sum1) == 4096)
 
-                features_sum2 = np.sum(bag2_features, axis=1)
+                features_sum2 = np.sum(bag2_features, axis=0)
                 assert(len(features_sum1) == 4096)
 
                 constraints.append((1. / (len(bag1))) * features_sum1 @ w - (1. / (len(bag2))) * features_sum2 @ w >= psi[idx])
@@ -176,7 +175,7 @@ class BallparkClassifier:
 
 
     def solve_w_y(self, reg_val=10 ** -1, v=False, weights_path=None):
-        if weights_path is not None and os.path.exists(weights_path):
+        if weights_path is not None and os.path.exists(weights_path + ".npy"):
             wt_1 = np.load(weights_path)
         else:
             wt_1, _ = self.get_w0(reg_val, v)
@@ -187,17 +186,20 @@ class BallparkClassifier:
 
             yt, _ = self.solve_y(wt_1, v=v)
             wt, _ = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
-            print(np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001))
+            diff = np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)
+            print(diff)
             if (np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)) <= 10 **-5:
                 print("exit")
                 return wt, yt, None
             else:
+                print("{}: end of solve w_y iteration with distance {}".format(t, np.dot(wt - wt_1, wt - wt_1) / (
+                            np.dot(wt_1, wt_1) + 0.000001)))
+
                 wt_1 = wt
 
                 np.save(weights_path, wt)
 
 
-            print("{}: end of solve w_y iteration with distance {}".format(t, np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)))
 
 
 
