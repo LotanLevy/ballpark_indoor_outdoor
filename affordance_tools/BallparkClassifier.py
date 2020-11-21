@@ -194,7 +194,7 @@ class BallparkClassifier:
 
                 wt_1 = wt
 
-                np.save(weights_path, wt)
+                np.save(weights_path + "_{}".format(t), wt)
 
 
 
