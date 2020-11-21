@@ -18,18 +18,38 @@ Sword_fish > 0.6
 Tweezers > 0.6
 Umbrella > 0.5
 Wheel < 0.3
+Umbrella - Bag > 0.1
+Umbrella - Boots > 0.1
+Tweezers - Bag > 0.1
+Tweezers - Boots > 0.1
 Screwdriver - Bag > 0.3
 Screwdriver - Boots > 0.3
 Screwdriver - Bottle > 0.1
 Screwdriver - Socks > 0.3
 Screwdriver - Wheel > 0.3
+Screwdriver - Umbrella > 0.1
+Screwdriver - Tweezers > 0.1
+Screwdriver - Pot > 0.3
+Pencil - Bag > 0.3
+Pencil - Boots > 0.3
+Pencil - Bottle > 0.1
+Pencil - Socks > 0.3
+Pencil - Wheel > 0.3
+Pencil - Pot > 0.1
 Sword - Bag > 0.3
 Sword - Boots > 0.3
 Sword - Bottle > 0.1
 Sword - Socks > 0.3
 Sword - Wheel > 0.3
+Sword - Umbrella > 0.1
+Sword - Tweezers > 0.1
+Sword - Pot > 0.3
+
 Knife - Bag > 0.3
 Knife - Boots > 0.3
 Knife - Bottle > 0.1
 Knife - Socks > 0.3
 Knife - Wheel > 0.3
+Knife - Umbrella > 0.1
+Knife - Tweezers > 0.1
+Knife - Pot > 0.3
