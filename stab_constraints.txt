@@ -44,7 +44,6 @@ Sword - Wheel > 0.3
 Sword - Umbrella > 0.1
 Sword - Tweezers > 0.1
 Sword - Pot > 0.3
-
 Knife - Bag > 0.3
 Knife - Boots > 0.3
 Knife - Bottle > 0.1
