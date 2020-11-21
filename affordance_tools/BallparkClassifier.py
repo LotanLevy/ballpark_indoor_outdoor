@@ -123,7 +123,7 @@ class BallparkClassifier:
             bag_features, paths = bag.get_features()
             loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
-        prob = cp.Problem(cp.Minimize(loss / self.data_size + reg_val * reg))
+        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg))
 
         try:
             prob.solve(verbose=v)
