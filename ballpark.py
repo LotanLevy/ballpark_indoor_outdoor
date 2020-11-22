@@ -36,6 +36,10 @@ def main():
     print("Reads constraints file")
     constraints = ConstraintsParser(args.constraints_file)
     preprocessing_func = lambda input_data: vgg16.preprocess_input(np.copy(input_data.astype('float32')))
+    with open(os.path.join(args.output_path, "constraints.txt"), 'w') as wr:
+        with open(args.constraints_file, 'r') as rf:
+            content = rf.read()
+            wr.write(content)
     print("Initialize dataloader")
     train_dataloader = Dataloader(args.train_root_path, 1, args.input_size, 0, preprocess_func=preprocessing_func)
     val_dataloader = Dataloader(args.val_root_path, 1, args.input_size, 0, preprocess_func=preprocessing_func, labels_map_path=args.labels_map_path)
@@ -78,6 +82,8 @@ def main():
     indices = np.random.choice(len(all_paths), 40, replace=False)
     paths_to_display = [all_paths[i] for i in indices]
     create_images_graph(args.output_path, paths_to_display, all_preds[indices])
+
+
 
 
 if __name__ == "__main__":
