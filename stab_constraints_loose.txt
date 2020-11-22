@@ -1,0 +1,8 @@
+Cup < 0.3
+Pot < 0.3
+Socks < 0.2
+Wheel < 0.3
+Knife > 0.8
+Pencil > 0.7
+Screwdriver > 0.8
+Sword > 0.8
