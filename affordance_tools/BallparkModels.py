@@ -95,7 +95,7 @@ class BallparkModels:
         if not self.legal_constraints:
             return None
         w = cp.Variable(self.features_num)  # +intercept
-        reg = cp.square(cp.norm(w, 2))
+        reg = cp.square(cp.norm(w, 1))
         yhat = cp.Variable(self.data_size)  # +intercept
 
         constraints = []
