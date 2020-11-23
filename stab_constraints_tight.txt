@@ -1,0 +1,47 @@
+Bag <0.1
+Boots < 0.1
+Bottle < 0.1
+Box < 0.1
+Cup < 0.1
+Glasses < 0.1
+Lamp < 0.1
+Pot < 0.1
+Socks < 0.1
+Wheel < 0.1
+Fishing_rod > 0.5
+Umbrella > 0.5
+Tweezers > 0.6
+Scissors > 0.7
+fork > 0.7
+Sword_fish > 0.7
+Screwdriver > 0.7
+Knife > 0.9
+Pencil > 0.9
+Sword > 0.9
+Umbrella - Bag > 0.05
+Umbrella - Boots > 0.05
+Umbrella - Bottle > 0.05
+Umbrella - Box > 0.05
+Umbrella - Cup > 0.05
+Umbrella - Glasses > 0.05
+Umbrella - Lamp > 0.05
+Umbrella - Pot > 0.05
+Umbrella - Socks > 0.05
+Umbrella - Wheel > 0.05
+Fishing_rod - Umbrella > 0.1
+Tweezers - Umbrella > 0.1
+Scissors - Fishing_rod > 0.1
+Scissors - Umbrella > 0.1
+fork - Tweezers > 0.1
+Pencil - fork > 0.1
+Sword_fish - fork > 0.1
+Screwdriver - fork > 0.1
+Pencil - Scissors > 0.1
+Sword_fish - Scissors > 0.1
+Screwdriver - Scissors > 0.1
+Sword - Screwdriver > 0.05
+Knife - Screwdriver > 0.05
+
+
+
+
