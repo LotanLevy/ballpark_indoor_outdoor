@@ -41,7 +41,3 @@ Sword_fish - Scissors > 0.1
 Screwdriver - Scissors > 0.1
 Sword - Screwdriver > 0.05
 Knife - Screwdriver > 0.05
-
-
-
-
