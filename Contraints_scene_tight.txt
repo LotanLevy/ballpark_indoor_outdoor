@@ -1,0 +1,23 @@
+balcony <0.2
+bedroom > 0.9
+chimney < 0.3
+garden < 0.2
+kitchen > 0.8
+patio < 0.2
+pool < 0.2
+restaurant > 0.6
+sitting_area > 0.6
+balcony - garden > 0.05
+pool - garden > 0.05
+restaurant - chimney > 0.2
+restaurant - patio > 0.2
+restaurant - balcony > 0.2
+restaurant - pool > 0.2
+sitting_area - chimney > 0.2
+sitting_area - patio > 0.2
+sitting_area - balcony > 0.2
+sitting_area - pool > 0.2
+bedroom - sitting_area > 0.1
+kitchen - sitting_area > 0.1
+bedroom - sitting_area > 0.1
+kitchen - sitting_area > 0.1
