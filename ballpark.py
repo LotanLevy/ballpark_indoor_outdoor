@@ -69,7 +69,7 @@ def main():
         all_labels = np.concatenate((all_labels, bag_labels))
         if args.cls_method:
             bag_preds = np.sign(bag_preds)
-        all_preds = np.concatenate((all_preds, np.sign(bag_preds)))
+        all_preds = np.concatenate((all_preds, bag_preds))
         all_paths += paths
         # display_predictions_for_bag(args.output_path, bag, bag_preds, paths)
     display_roc_graph(args.output_path, "indoor_outdoor", all_preds, all_labels)
