@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from affordance_tools.Bag import Bag
 import os
+from tensorflow.keras.models import Model
 
 
 
@@ -50,14 +51,20 @@ class Dataloader:
             for path in self.train_iter.filepaths:
                 f.write(path + "\n")
 
+    def get_features_model(self, input_size):
+        self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
+                                            weights='imagenet')
+        return Model(inputs=self.model.input, outputs=self.model.layers[-2].output)
+
 
 
     def split_into_bags(self, train=True):
         data_iter = self.train_iter if train else self.val_iter
         bags = dict()
+        model = self.get_features_model(self.input_size)
         for cls_name, label in data_iter.class_indices.items():
             items_indices = np.where(data_iter.labels == label)[0]
-            bag = Bag(cls_name, data_iter, items_indices, self.input_size, bag_label=label, path2label_dict=self.paths2labels_dict)
+            bag = Bag(cls_name, data_iter, items_indices, bag_label=label, model = model, path2label_dict=self.paths2labels_dict)
             bags[cls_name] = bag
             # bag.display_bag()
         print("Bags names {}".format(bags.keys()))

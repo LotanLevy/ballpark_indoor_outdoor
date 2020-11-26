@@ -7,18 +7,15 @@ from PIL import Image
 
 
 class Bag:
-    def __init__(self, cls_name, data_iterator, cls_indices, input_size, bag_label, path2label_dict=None):
+    def __init__(self, cls_name, data_iterator, cls_indices, bag_label, model, path2label_dict=None):
         self.cls_name = cls_name
         self.data_iterator = data_iterator
         self.cls_indices = cls_indices
-        self.features_model = self.get_features_model(input_size)
+        self.features_model = model
         self.bag_label = bag_label
         self.path2label_dict = path2label_dict
 
-    def get_features_model(self, input_size):
-        self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
-                                            weights='imagenet')
-        return Model(inputs=self.model.input, outputs=self.model.layers[-2].output)
+
 
     def __len__(self):
         return len(self.cls_indices)
