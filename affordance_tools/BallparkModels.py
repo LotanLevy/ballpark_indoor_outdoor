@@ -93,6 +93,7 @@ class BallparkModels:
 
     def solve_w_y(self, reg_val=10**-1, v=False, weights_path=None):
         if not self.legal_constraints:
+
             return None
         w = cp.Variable(self.features_num)  # +intercept
         reg = cp.square(cp.norm(w, 2))

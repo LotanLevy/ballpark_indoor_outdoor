@@ -1,0 +1,59 @@
+0.00 < amusement_park < 0.32
+0.00 < art_studio < 0.30
+0.65 < beach < 1.00
+0.00 < bedroom < 0.30
+0.00 < farm < 0.40
+0.00 < field < 0.34
+0.70 < fjord < 1.00
+0.52 < flood < 1.00
+0.00 < fortress < 0.57
+0.27 < fountain < 0.87
+0.00 < gardens < 0.44
+0.70 < harbor < 1.00
+0.00 < hospital < 0.34
+0.00 < hotel < 0.34
+0.62 < hot_spring < 1.00
+0.00 < house < 0.36
+0.70 < jaccuzi < 1.00
+0.00 < kitchen < 0.30
+0.70 < lake < 1.00
+0.00 < mall < 0.35
+0.00 < market < 0.30
+0.00 < mountain < 0.40
+0.00 < office < 0.30
+0.00 < restaurant < 0.36
+0.00 < road < 0.30
+0.00 < spa < 0.55
+0.70 < swimming_hole < 1.00
+0.70 < swimming_pool < 1.00
+0.08 < waterfall < 0.68
+0.00 < zoo < 0.48
+0.00 < amusement_park - art_studio < 0.32
+0.00 < amusement_park - road < 0.32
+0.00 < amusement_park - bedroom < 0.32
+0.00 < amusement_park - office < 0.32
+0.00 < amusement_park - market < 0.32
+0.00 < amusement_park - kitchen < 0.32
+0.00 < hospital - amusement_park < 0.32
+0.00 < hotel - hospital < 0.30
+0.00 < field - hotel < 0.30
+0.00 < mall - field < 0.31
+0.00 < house - mall < 0.31
+0.00 < restaurant - house < 0.30
+0.00 < farm - restaurant < 0.33
+0.00 < mountain - farm < 0.31
+0.00 < gardens - mountain < 0.34
+0.00 < zoo - gardens < 0.34
+0.00 < spa - zoo < 0.37
+0.00 < fortress - spa < 0.32
+0.00 < waterfall - fortress < 0.41
+0.00 < fountain - waterfall < 0.49
+0.00 < flood - fountain < 0.55
+0.00 < hot_spring - flood < 0.40
+0.00 < beach - hot_spring < 0.34
+0.00 < lake - beach < 0.35
+0.00 < harbor - beach < 0.35
+0.00 < fjord - beach < 0.35
+0.00 < swimming_hole - beach < 0.35
+0.00 < swimming_pool - beach < 0.35
+0.00 < jaccuzi - beach < 0.35
