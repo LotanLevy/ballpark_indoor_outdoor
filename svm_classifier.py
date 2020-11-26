@@ -55,6 +55,8 @@ def get_args_parser():
 
     parser.add_argument('--input_size',  type=int, default=224)
     parser.add_argument('--split_val',  type=int, default=0.2)
+    parser.add_argument('--max_files',  type=int, default=None)
+
 
 
     parser.add_argument('--labels_map_path',  type=str, default=None)
@@ -79,11 +81,12 @@ def main():
 
     positive_features, _ = train_bags["1"].get_features()
     negative_features, _ = train_bags["0"].get_features()
-    pos_idx = np.random.choice(positive_features.shape[0], 200)
-    neg_idx = np.random.choice(negative_features.shape[0], 200)
+    if args.max_files is not None:
+        pos_idx = np.random.choice(positive_features.shape[0], args.max_files)
+        neg_idx = np.random.choice(negative_features.shape[0], args.max_files)
 
-    positive_features = positive_features[pos_idx]
-    negative_features = negative_features[neg_idx]
+        positive_features = positive_features[pos_idx]
+        negative_features = negative_features[neg_idx]
 
 
     y_positive = np.ones(positive_features.shape[0])
