@@ -1,0 +1,155 @@
+access_road < 0.1
+air_field < 0.1
+alley < 0.1
+balcony < 0.2
+beach < 0.2
+bridge < 0.2
+building < 0.3
+canal < 0.2
+canyon < 0.1
+castle < 0.4
+coast < 0.2
+farm < 0.3
+field < 0.1
+forest <  0.1
+garden < 0.1
+mountain < 0.1
+ocean < 0.1
+house <0.4
+swimming_pool < 0.5
+sport_court < 0.5
+0.9>campus>0.5
+0.9 > bazaar > 0.6
+pub > 0.6
+restaurant > 0.5
+corridor > 0.8
+bathroom>0.8
+art_studio > 0.8
+beauty_salon > 0.7
+bedroom > 0.8
+kitchen > 0.8
+campus - swimming_pool > 0.1
+sport_court - swimming_pool > 0.1
+bazaar - swimming_pool > 0.1
+restaurant - swimming_pool > 0.1
+pub - swimming_pool > 0.1
+campus - house > 0.2
+sport_court - house > 0.2
+bazaar - house > 0.2
+pub - house > 0.1
+restaurant - house > 0.1
+campus - ocean > 0.3
+sport_court - ocean > 0.3
+bazaar - ocean > 0.3
+pub - ocean > 0.1
+restaurant - ocean > 0.1
+campus - mountain > 0.3
+sport_court - mountain > 0.3
+bazaar - mountain > 0.3
+pub - mountain > 0.1
+restaurant - mountain > 0.1
+campus - garden > 0.3
+sport_court - garden > 0.3
+bazaar - garden > 0.3
+pub - garden > 0.1
+restaurant - garden > 0.1
+campus - forest > 0.3
+sport_court - forest > 0.3
+bazaar - forest > 0.3
+pub - forest > 0.1
+restaurant - forest > 0.1
+campus - field > 0.3
+sport_court - field > 0.3
+bazaar - field > 0.3
+pub - field > 0.1
+restaurant - field > 0.1
+campus - farm > 0.3
+sport_court - farm > 0.3
+bazaar - farm > 0.3
+pub - farm > 0.1
+restaurant - farm > 0.1
+campus - coast > 0.3
+sport_court - coast > 0.3
+bazaar - coast > 0.3
+pub - coast > 0.1
+restaurant - coast > 0.1
+campus - castle > 0.2
+sport_court - castle > 0.2
+bazaar - castle > 0.2
+pub - castle > 0.1
+restaurant - castle > 0.1
+campus - canyon > 0.3
+sport_court - canyon > 0.3
+bazaar - canyon > 0.3
+pub - canyon > 0.1
+restaurant - canyon > 0.1
+campus - canal > 0.3
+sport_court - canal > 0.3
+bazaar - canal > 0.3
+pub - canal > 0.1
+restaurant - canal > 0.1
+campus - building > 0.3
+sport_court - building > 0.3
+bazaar - building > 0.3
+pub - building > 0.1
+restaurant - building > 0.1
+campus - bridge > 0.3
+sport_court - bridge > 0.3
+bazaar - bridge > 0.3
+pub - bridge > 0.1
+restaurant - bridge > 0.1
+campus - alley > 0.3
+sport_court - alley > 0.3
+bazaar - alley > 0.3
+pub - alley > 0.1
+restaurant - alley > 0.1
+campus - beach > 0.3
+sport_court - beach > 0.3
+bazaar - beach > 0.3
+pub - beach > 0.1
+restaurant - beach > 0.1
+campus - access_road > 0.3
+sport_court - access_road > 0.3
+bazaar - access_road > 0.3
+pub - access_road > 0.1
+restaurant - access_road > 0.1
+campus - air_field > 0.3
+sport_court - air_field > 0.3
+bazaar - air_field > 0.3
+pub - air_field > 0.1
+restaurant - air_field > 0.1
+campus - balcony > 0.2
+sport_court - balcony > 0.2
+bazaar - balcony > 0.2
+pub - balcony > 0.1
+restaurant - balcony > 0.1
+corridor - campus > 0.1
+bathroom - campus > 0.1
+art_studio - campus > 0.1
+beauty_salon - campus > 0.1
+bedroom - campus > 0.1
+kitchen - campus > 0.1
+corridor - sport_court > 0.1
+bathroom - sport_court > 0.1
+art_studio - sport_court > 0.1
+beauty_salon - sport_court > 0.1
+bedroom - sport_court > 0.1
+kitchen - sport_court > 0.1
+corridor - bazaar > 0.1
+bathroom - bazaar > 0.1
+art_studio - bazaar > 0.1
+beauty_salon - bazaar > 0.1
+bedroom - bazaar > 0.1
+kitchen - bazaar > 0.1
+corridor - pub > 0.1
+bathroom - pub > 0.1
+art_studio - pub > 0.1
+beauty_salon - pub > 0.1
+bedroom - pub > 0.1
+kitchen - pub > 0.1
+corridor - restaurant > 0.1
+bathroom - restaurant > 0.1
+art_studio - restaurant > 0.1
+beauty_salon - restaurant > 0.1
+bedroom - restaurant > 0.1
+kitchen - restaurant > 0.1

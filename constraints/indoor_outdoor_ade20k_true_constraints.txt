@@ -1,0 +1,59 @@
+0.00 < access_road < 0.19
+0.00 < air_field < 0.10
+0.00 < alley < 0.10
+0.90 < art_studio < 1.00
+0.00 < balcony < 0.10
+0.90 < bathroom < 1.00
+0.27 < bazaar < 0.47
+0.00 < beach < 0.10
+0.90 < beauty_salon < 1.00
+0.90 < bedroom < 1.00
+0.00 < bridge < 0.10
+0.00 < building < 0.10
+0.55 < campus < 0.75
+0.00 < canal < 0.10
+0.00 < canyon < 0.10
+0.00 < castle < 0.10
+0.00 < coast < 0.10
+0.90 < corridor < 1.00
+0.00 < farm < 0.10
+0.00 < field < 0.10
+0.00 < forest < 0.10
+0.00 < garden < 0.10
+0.00 < house < 0.11
+0.90 < kitchen < 1.00
+0.00 < mountain < 0.10
+0.00 < ocean < 0.10
+0.77 < pub < 0.97
+0.44 < restaurant < 0.64
+0.30 < sport_court < 0.50
+0.40 < swimming_pool < 0.60
+0.00 < house - canyon < 0.11
+0.00 < house - farm < 0.11
+0.00 < house - canal < 0.11
+0.00 < house - field < 0.11
+0.00 < house - building < 0.11
+0.00 < house - bridge < 0.11
+0.00 < house - forest < 0.11
+0.00 < house - castle < 0.11
+0.00 < house - garden < 0.11
+0.00 < house - mountain < 0.11
+0.00 < house - balcony < 0.11
+0.00 < house - ocean < 0.11
+0.00 < house - alley < 0.11
+0.00 < house - air_field < 0.11
+0.00 < house - beach < 0.11
+0.00 < house - coast < 0.11
+0.00 < access_road - house < 0.18
+0.18 < bazaar - access_road < 0.38
+0.00 < sport_court - bazaar < 0.14
+0.00 < swimming_pool - sport_court < 0.20
+0.00 < restaurant - swimming_pool < 0.14
+0.02 < campus - restaurant < 0.22
+0.11 < pub - campus < 0.31
+0.03 < bedroom - pub < 0.23
+0.03 < beauty_salon - pub < 0.23
+0.03 < kitchen - pub < 0.23
+0.03 < bathroom - pub < 0.23
+0.03 < art_studio - pub < 0.23
+0.03 < corridor - pub < 0.23
