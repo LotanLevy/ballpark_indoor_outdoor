@@ -4,6 +4,8 @@ from affordance_tools.Bag import Bag
 import os
 from tensorflow.keras.models import Model
 
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Dataloader:
@@ -54,7 +56,7 @@ class Dataloader:
     def get_features_model(self, input_size):
         self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
                                             weights='imagenet')
-        return Model(inputs=self.model.input, outputs=self.model.layers[-2].output)
+        return Model(inputs=self.model.input, outputs=self.model.layers[-3].output)
 
 
 
