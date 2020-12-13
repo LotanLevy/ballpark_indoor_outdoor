@@ -1,0 +1,43 @@
+0.19 < restaurant - court < 0.50
+0.19 < restaurant - farm < 0.50
+0.10 < restaurant - field < 0.50
+0.10 < restaurant - jacuzzi < 0.50
+0.10 < restaurant - swimming_pool < 0.50
+0.10 < restaurant - market < 0.50
+0.15 < restaurant - road < 0.50
+0.15 < restaurant - theater < 0.50
+0.17 < restaurant - yard < 0.50
+0.19 < restaurant - bedroom < 0.50
+0.19 < restaurant - kitchen < 0.50
+0.19 < restaurant - sitting_room < 0.50
+0.10 < restaurant - classroom < 0.50
+0.10 < restaurant - shop < 0.50
+0.02 < garden - court < 0.40
+0.02 < garden - farm < 0.40
+0.00 < garden - yard < 0.40
+0.02 < garden - bedroom < 0.40
+0.02 < garden - kitchen < 0.40
+0.02 < garden - sitting_room < 0.40
+0.01 < dine_place - court < 0.30
+0.01 < dine_place - farm < 0.30
+0.01 < dine_place - bedroom < 0.30
+0.01 < dine_place - kitchen < 0.30
+0.01 < dine_place - sitting_room < 0.30
+0.20 < restaurant < 0.50
+0.03 < garden < 0.40
+0.02 < dine_place < 0.30
+court < 0.01
+farm < 0.01
+field < 0.10
+house < 0.30
+jacuzzi < 0.10
+swimming_pool < 0.10
+market < 0.10
+road < 0.05
+theater < 0.05
+yard < 0.03
+bedroom < 0.01
+kitchen < 0.01
+sitting_room < 0.01
+classroom < 0.10
+shop < 0.10

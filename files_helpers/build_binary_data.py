@@ -1,14 +1,14 @@
 import os
 from shutil import copy
 ##### train
-output_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets"
+output_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine"
 
-src_root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\scene_google"
+src_root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\noisy_train_5"
 
-outdoor_classes = ["garden", "balcony"]
-indoor_classes = ["kitchen", "bedroom"]
+negative_classes = ["beach", "field", "nature", "parking", "road", "shop", "sport_area"]
+positive_classes = ["restaurant", "lobby", "dining_room"]
 
-dest_dir_name = "binary_small_train_scene_google"
+dest_dir_name = "polar_noisy_train_5"
 
 dest_dir = os.path.join(output_path, dest_dir_name)
 negatives_dir = os.path.join(dest_dir, "0")
@@ -23,14 +23,20 @@ os.makedirs(os.path.join(output_path, positives_dir))
 def copy_dir_items(src_path, dest_path, cls_name):
     for item in os.listdir(src_path):
         item_path = os.path.join(src_path, item)
-        dest_item_path = os.path.join(dest_path, cls_name+"_"+item)
-        copy(item_path, dest_item_path)
+        if os.path.isdir(item_path):
+            for sub_item in os.listdir(item_path):
+                sub_item_path = os.path.join(item_path, sub_item)
+                dest_item_path = os.path.join(dest_path, cls_name + "_" + item + "_" + sub_item)
+                copy(sub_item_path, dest_item_path)
+        else:
+            dest_item_path = os.path.join(dest_path, cls_name+"_"+item)
+            copy(item_path, dest_item_path)
 
 
 for dir in os.listdir(src_root):
-    if dir in indoor_classes:
+    if dir in positive_classes:
         copy_dir_items(os.path.join(src_root, dir), positives_dir, dir)
-    elif dir in outdoor_classes:
+    elif dir in negative_classes:
         copy_dir_items(os.path.join(src_root, dir), negatives_dir, dir)
     else:
         print("dir {} doesn't belong to any list".format(dir))

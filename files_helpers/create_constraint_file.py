@@ -1,9 +1,11 @@
 import os
 import numpy as np
-labels_map = {"swimmable": 1, "non_swimmable": 0}
+labels_map = {"can": 1, "cant": 0}
+from affordance_tools.ContraintsParser import ConstraintsParser
 
-root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\swim_ade20k\\train"
-dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\constraints\\swim_ade20k_true_constraints_eps_03.txt"
+
+root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\bicycling\\train"
+dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\constraints\\bicycling_true_constraints_eps_03.txt"
 EPS = 0.3
 
 def get_indoor_size(root_path, sub_cls2label):
@@ -19,6 +21,8 @@ def get_indoor_size(root_path, sub_cls2label):
             total_size += len(os.listdir(sub_cls_path))
             if sub_cls2label[sub_cls] == 1:
                 positive_size = len(os.listdir(sub_cls_path))
+        if total_size == 0:
+            print(cls + " is empty")
         parts[cls] = positive_size/total_size
     return parts
 
@@ -56,12 +60,60 @@ def write_bounds(parts, dest):
         for cls, bounds in parts.items():
             f.write("{} < {} < {}\n".format(format(bounds[0], '.2f'), cls, format(bounds[1], '.2f')))
 
+# creates from splitted dir
+# true_indoor_percent = get_indoor_size(root, labels_map)
+# bounds = create_lower_and_upper_bounds(true_indoor_percent, EPS)
+# diff_bounds = create_mutual_bounds(true_indoor_percent, EPS)
+# all_bounds = {**bounds, **diff_bounds}
+# write_bounds(all_bounds, dest)
 
-true_indoor_percent = get_indoor_size(root, labels_map)
-bounds = create_lower_and_upper_bounds(true_indoor_percent, EPS)
-diff_bounds = create_mutual_bounds(true_indoor_percent, EPS)
-all_bounds = {**bounds, **diff_bounds}
-write_bounds(all_bounds, dest)
+# creates from constraints file
+def build_diff_constraints_from_lower_and_upper(constraints_parser):
+    diff_constraints_bounds = dict()
+
+    lowers = constraints_parser.lower_bounds
+    uppers = constraints_parser.upper_bounds
+    for cls1, lower in lowers.items():
+        for cls2, upper in uppers.items():
+            if lower >= upper:
+                c1_upper = uppers[cls1] if cls1 in uppers else 1
+                c2_lower = lowers[cls2] if cls2 in lowers else 0
+                diff_lower = lower - upper
+                diff_upper = c1_upper - c2_lower
+                diff_constraints_bounds["{} - {}".format(cls1, cls2)] = (diff_lower, diff_upper)
+    return diff_constraints_bounds
+
+def get_all_bounds(constraints_path):
+    constraints_parser = ConstraintsParser(constraints_path)
+    constraints_bounds = build_diff_constraints_from_lower_and_upper(constraints_parser)
+    for cls, lower in constraints_parser.lower_bounds.items():
+        constraints_bounds[cls] = (lower, None)
+    for cls, upper in constraints_parser.upper_bounds.items():
+        if cls in constraints_bounds:
+            lower = constraints_bounds[cls][0]
+            constraints_bounds[cls] = (lower, upper)
+        else:
+            constraints_bounds[cls] = (None, upper)
+    return constraints_bounds
+
+def write_bounds_into_file(all_bounds_dict, dest_full_path):
+    with open(dest_full_path, "w") as f:
+        for name, bounds in all_bounds_dict.items():
+            if bounds[0] is not None and bounds[1] is not None:
+                f.write("\n{} < {} < {}".format(format(bounds[0], '.2f'), name, format(bounds[1], '.2f')))
+            elif bounds[0] is not None:
+                f.write("\n{} > {}".format(name, format(bounds[0], '.2f')))
+            else:
+                f.write("\n{} < {}".format(name, format(bounds[1], '.2f')))
+
+
+
+
+PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\constraints\\exploration_ride_road.txt"
+DEST = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\constraints\\exploration_ride_road_full.txt"
+all_bounds = get_all_bounds(PATH)
+write_bounds_into_file(all_bounds, DEST)
+
 
 
 

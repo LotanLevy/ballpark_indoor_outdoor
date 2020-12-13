@@ -1,0 +1,25 @@
+0.00 < beach < 0.10
+0.90 < dining_room < 1.00
+0.00 < field < 0.10
+0.05 < garden < 0.25
+0.73 < lobby < 0.93
+0.00 < nature < 0.10
+0.01 < park < 0.21
+0.00 < parking < 0.11
+0.69 < restaurant < 0.89
+0.00 < road < 0.10
+0.00 < shop < 0.19
+0.00 < sport_area < 0.10
+0.00 < street < 0.20
+0.00 < parking - beach < 0.11
+0.00 < parking - field < 0.11
+0.00 < parking - nature < 0.11
+0.00 < parking - road < 0.11
+0.00 < parking - sport_area < 0.11
+0.00 < shop - parking < 0.17
+0.00 < street - shop < 0.11
+0.00 < park - street < 0.11
+0.00 < garden - park < 0.14
+0.55 < restaurant - garden < 0.75
+0.00 < lobby - restaurant < 0.14
+0.06 < dining_room - lobby < 0.26

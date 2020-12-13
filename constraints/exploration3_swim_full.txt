@@ -1,0 +1,50 @@
+0.70 < jacuzzi - restaurant < 1.00
+0.70 < jacuzzi - court < 1.00
+0.79 < jacuzzi - farm < 1.00
+0.70 < jacuzzi - field < 1.00
+0.40 < jacuzzi - garden < 1.00
+0.60 < jacuzzi - house < 1.00
+0.79 < jacuzzi - market < 1.00
+0.70 < jacuzzi - road < 1.00
+0.70 < jacuzzi - theater < 1.00
+0.70 < jacuzzi - yard < 1.00
+0.79 < jacuzzi - bedroom < 1.00
+0.79 < jacuzzi - kitchen < 1.00
+0.79 < jacuzzi - sitting_room < 1.00
+0.79 < jacuzzi - dine_place < 1.00
+0.79 < jacuzzi - classroom < 1.00
+0.79 < jacuzzi - shop < 1.00
+0.70 < swimming_pool - restaurant < 1.00
+0.70 < swimming_pool - court < 1.00
+0.79 < swimming_pool - farm < 1.00
+0.70 < swimming_pool - field < 1.00
+0.40 < swimming_pool - garden < 1.00
+0.60 < swimming_pool - house < 1.00
+0.79 < swimming_pool - market < 1.00
+0.70 < swimming_pool - road < 1.00
+0.70 < swimming_pool - theater < 1.00
+0.70 < swimming_pool - yard < 1.00
+0.79 < swimming_pool - bedroom < 1.00
+0.79 < swimming_pool - kitchen < 1.00
+0.79 < swimming_pool - sitting_room < 1.00
+0.79 < swimming_pool - dine_place < 1.00
+0.79 < swimming_pool - classroom < 1.00
+0.79 < swimming_pool - shop < 1.00
+jacuzzi > 0.80
+swimming_pool > 0.80
+restaurant < 0.10
+court < 0.10
+farm < 0.01
+field < 0.10
+garden < 0.40
+house < 0.20
+market < 0.01
+road < 0.10
+theater < 0.10
+yard < 0.10
+bedroom < 0.01
+kitchen < 0.01
+sitting_room < 0.01
+dine_place < 0.01
+classroom < 0.01
+shop < 0.01

@@ -1,0 +1,88 @@
+0.00 < court - market < 0.40
+0.00 < court - theater < 0.40
+0.00 < court - bedroom < 0.40
+0.00 < court - kitchen < 0.40
+0.00 < court - sitting_room < 0.40
+0.00 < court - dine_place < 0.40
+0.00 < court - classroom < 0.40
+0.00 < court - shop < 0.40
+0.50 < farm - restaurant < 1.00
+0.20 < farm - court < 0.99
+0.30 < farm - jacuzzi < 1.00
+0.30 < farm - swimming_pool < 1.00
+0.59 < farm - market < 1.00
+0.50 < farm - road < 1.00
+0.59 < farm - theater < 1.00
+0.59 < farm - bedroom < 1.00
+0.59 < farm - kitchen < 1.00
+0.59 < farm - sitting_room < 1.00
+0.59 < farm - dine_place < 1.00
+0.59 < farm - classroom < 1.00
+0.59 < farm - shop < 1.00
+0.60 < field - restaurant < 1.00
+0.30 < field - court < 0.99
+0.40 < field - jacuzzi < 1.00
+0.40 < field - swimming_pool < 1.00
+0.69 < field - market < 1.00
+0.60 < field - road < 1.00
+0.69 < field - theater < 1.00
+0.69 < field - bedroom < 1.00
+0.69 < field - kitchen < 1.00
+0.69 < field - sitting_room < 1.00
+0.69 < field - dine_place < 1.00
+0.69 < field - classroom < 1.00
+0.69 < field - shop < 1.00
+0.70 < garden - restaurant < 1.00
+0.40 < garden - court < 0.99
+0.50 < garden - jacuzzi < 1.00
+0.50 < garden - swimming_pool < 1.00
+0.79 < garden - market < 1.00
+0.70 < garden - road < 1.00
+0.79 < garden - theater < 1.00
+0.79 < garden - bedroom < 1.00
+0.79 < garden - kitchen < 1.00
+0.79 < garden - sitting_room < 1.00
+0.79 < garden - dine_place < 1.00
+0.79 < garden - classroom < 1.00
+0.79 < garden - shop < 1.00
+0.10 < house - restaurant < 1.00
+0.19 < house - market < 1.00
+0.10 < house - road < 1.00
+0.19 < house - theater < 1.00
+0.19 < house - bedroom < 1.00
+0.19 < house - kitchen < 1.00
+0.19 < house - sitting_room < 1.00
+0.19 < house - dine_place < 1.00
+0.19 < house - classroom < 1.00
+0.19 < house - shop < 1.00
+0.50 < yard - restaurant < 1.00
+0.20 < yard - court < 0.99
+0.30 < yard - jacuzzi < 1.00
+0.30 < yard - swimming_pool < 1.00
+0.59 < yard - market < 1.00
+0.50 < yard - road < 1.00
+0.59 < yard - theater < 1.00
+0.59 < yard - bedroom < 1.00
+0.59 < yard - kitchen < 1.00
+0.59 < yard - sitting_room < 1.00
+0.59 < yard - dine_place < 1.00
+0.59 < yard - classroom < 1.00
+0.59 < yard - shop < 1.00
+0.01 < court < 0.40
+farm > 0.60
+field > 0.70
+garden > 0.80
+house > 0.20
+yard > 0.60
+restaurant < 0.10
+jacuzzi < 0.30
+swimming_pool < 0.30
+market < 0.01
+road < 0.10
+theater < 0.01
+bedroom < 0.01
+kitchen < 0.01
+sitting_room < 0.01
+dine_place < 0.01
+classroom < 0.01
+shop < 0.01

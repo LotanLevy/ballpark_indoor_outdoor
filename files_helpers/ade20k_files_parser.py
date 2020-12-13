@@ -34,10 +34,11 @@ def build_sub_classes_from_root(root_path, dest, sub_cls2label):
                 # image = Image.open(im_path, 'r')
                 # image.save(os.path.join(sub_cls_dest, im_name))
 
+##### train
 
-root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\swim_ade20k\\test"
-dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\swim_ade20k\\test_binary"
-sub_cls2label = {"non_swimmable": "0", "swimmable": "1"}
+root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\noisy_train_10"
+dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\noisy_train_10_binary"
+sub_cls2label = {"cant": "0", "can": "1"}
 build_sub_classes_from_root(root, dest, sub_cls2label)
 
 

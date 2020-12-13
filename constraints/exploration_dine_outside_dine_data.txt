@@ -1,0 +1,13 @@
+sport_area < 0.1
+shop < 0.1
+road < 0.1
+0.2 < restaurant < 0.5
+parking < 0.1
+0.1 < park < 0.4
+0.01 < street < 0.1
+nature < 0.1
+lobby < 0.1
+garden < 0.2
+field < 0.1
+dining_room < 0.1
+beach < 0.1

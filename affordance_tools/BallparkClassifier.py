@@ -178,7 +178,6 @@ class BallparkClassifier:
             wt_1, _ = self.get_w0(reg_val, v)
         t = 0
         while(True):
-            print(wt_1)
             t += 1
 
             yt, _ = self.solve_y(wt_1, v=v)

@@ -11,6 +11,8 @@ from sklearn.metrics import confusion_matrix
 import numpy as np
 from evaluation_tools.evaluate import *
 import matplotlib.pyplot as plt
+from shutil import copyfile
+
 
 def get_args_parser():
     parser = argparse.ArgumentParser(description='Process constraint collector args.')
@@ -18,10 +20,14 @@ def get_args_parser():
     parser.add_argument('--train_root_path',  type=str, required=True)
     parser.add_argument('--val_root_path',  type=str, required=True)
     parser.add_argument('--cls_method',  action="store_true")
+    parser.add_argument('--features_level',  type=int, default=-2)
+
 
 
     parser.add_argument('--input_size',  type=int, default=224)
     parser.add_argument('--split_val',  type=int, default=0.2)
+    parser.add_argument('--test_type',  type=str, choices=['explore', 'valid'], default='valid')
+
 
 
     parser.add_argument('--labels_map_path',  type=str, default=None)
@@ -41,8 +47,8 @@ def main():
             content = rf.read()
             wr.write(content)
     print("Initialize dataloader")
-    train_dataloader = Dataloader(args.train_root_path, 1, args.input_size, 0, preprocess_func=preprocessing_func)
-    val_dataloader = Dataloader(args.val_root_path, 1, args.input_size, 0, preprocess_func=preprocessing_func, labels_map_path=args.labels_map_path)
+    train_dataloader = Dataloader(args.train_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func)
+    val_dataloader = Dataloader(args.val_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func, labels_map_path=args.labels_map_path)
 
     print("Split data into bags")
     train_bags = train_dataloader.split_into_bags(train=True)
@@ -72,18 +78,48 @@ def main():
         all_preds = np.concatenate((all_preds, bag_preds))
         all_paths += paths
         # display_predictions_for_bag(args.output_path, bag, bag_preds, paths)
-    display_roc_graph(args.output_path, "indoor_outdoor", all_preds, all_labels)
-    pred_classifications = get_classifications_by_roc(all_preds, all_labels)
-    tn, fp, fn, tp = confusion_matrix(all_labels, pred_classifications).ravel()
-    display_paths_according_to_the_confusion_matrix(args.output_path, all_paths, pred_classifications, all_labels)
-    print(tn, fp, fn, tp)
 
-    # sorted_indices = np.argsort(all_preds)
-    # fig = plt.figure()
-    # incdices = np.random.randint(0, len(sorted_indices), 40)
-    indices = np.random.choice(len(all_paths), 40, replace=False)
-    paths_to_display = [all_paths[i] for i in indices]
-    create_images_graph(args.output_path, paths_to_display, all_preds[indices])
+    # for classifying
+    if args.test_type == 'valid':
+        display_roc_graph(args.output_path, "indoor_outdoor", all_preds, all_labels)
+        pred_classifications = get_classifications_by_roc(all_preds, all_labels)
+        tn, fp, fn, tp = confusion_matrix(all_labels, pred_classifications).ravel()
+        print(tn, fp, fn, tp)
+        display_paths_according_to_the_confusion_matrix(args.output_path, all_paths, pred_classifications, all_labels)
+        indices = np.random.choice(len(all_paths), 40, replace=False)
+        paths_to_display = [all_paths[i] for i in indices]
+        create_images_graph(args.output_path, paths_to_display, all_preds[indices])
+
+    # for exploration
+    if args.test_type == 'explore':
+        images_path = os.path.join(args.output_path, "scored_test")
+        os.makedirs(images_path, exist_ok=True)
+        for path, pred in list(zip(all_paths, all_preds)):
+            file_name = os.path.basename(path)
+            copyfile(path, os.path.join(images_path, "{}_{}".format(format(pred, '.2f').replace(".", "_"),file_name)))
+
+        # if not args.cls_method:
+        #     display_roc_graph(args.output_path, "indoor_outdoor", all_preds, all_labels)
+        #     final_classification = get_classifications_by_roc(all_preds, all_labels)
+        # else:
+        #     final_classification = all_preds
+        # images_path = os.path.join(args.output_path, "splitted_test")
+        # os.makedirs(images_path, exist_ok=True)
+        # labels = np.unique(final_classification)
+        # for label in labels:
+        #     label_name = 0 if label <= 0 else 1
+        #     label_path = os.path.join(images_path, str(label_name))
+        #     if not os.path.exists(label_path):
+        #         os.makedirs(label_path)
+        #     labels_indices = np.where(final_classification == label)[0]
+        #     for i in labels_indices:
+        #         file_path = all_paths[i]
+        #         file_name = os.path.basename(file_path)
+        #         copyfile(file_path, os.path.join(label_path, file_name))
+        #
+        #
+        #
+
 
 
 

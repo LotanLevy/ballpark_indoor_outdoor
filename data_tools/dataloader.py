@@ -9,12 +9,13 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Dataloader:
-    def __init__(self, root_dir, batch_size, input_size, split_val, shuffle=False,
+    def __init__(self, root_dir, batch_size, input_size, split_val, features_level=-2, shuffle=False,
                                   preprocess_func=lambda x: x, use_aug=False, labels_map_path=None):
         self.root_dir = root_dir
         self.input_size = input_size
         self.labels = "inferred"
         self.paths2labels_dict = None if labels_map_path is None else self._parse_label_map(labels_map_path)
+        self.features_level = features_level
 
         self.train_iter, self.val_iter = self._get_iterators_by_root_dir(root_dir, batch_size, (input_size, input_size),
                                                                          split_val,
@@ -53,17 +54,17 @@ class Dataloader:
             for path in self.train_iter.filepaths:
                 f.write(path + "\n")
 
-    def get_features_model(self, input_size):
+    def get_features_model(self, input_size, features_level=-2):
         self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
                                             weights='imagenet')
-        return Model(inputs=self.model.input, outputs=self.model.layers[-2].output)
+        return Model(inputs=self.model.input, outputs=self.model.layers[features_level].output)
 
 
 
     def split_into_bags(self, train=True):
         data_iter = self.train_iter if train else self.val_iter
         bags = dict()
-        model = self.get_features_model(self.input_size)
+        model = self.get_features_model(self.input_size, self.features_level)
         for cls_name, label in data_iter.class_indices.items():
             items_indices = np.where(data_iter.labels == label)[0]
             bag = Bag(cls_name, data_iter, items_indices, bag_label=label, model = model, path2label_dict=self.paths2labels_dict)

@@ -1,0 +1,18 @@
+0.01 < restaurant < 0.10
+0.10 < court < 0.70
+farm > 0.50
+field > 0.70
+garden > 0.60
+house > 0.60
+jacuzzi > 0.01
+0.20 < swimming_pool < 0.50
+0.01 < market < 0.10
+0.40 < road < 0.80
+0.10 < theater < 0.60
+yard > 0.50
+bedroom < 0.01
+kitchen < 0.01
+sitting_room < 0.01
+dine_place < 0.20
+classroom < 0.10
+shop < 0.10
