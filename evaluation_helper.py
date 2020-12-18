@@ -1,8 +1,8 @@
 
-fn = 36
-tp = 165
-fp = 34
-tn = 226
+fn = 14
+tp = 76
+fp = 51
+tn = 418
 
 sum_data = fp + fn + tp + tn
 

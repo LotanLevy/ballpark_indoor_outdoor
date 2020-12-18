@@ -142,8 +142,6 @@ class BallparkClassifier:
 
         psi = cp.Variable(len(P))
 
-        print(P)
-
         constraints = []
         if len(P) > 0:
             for idx, pair in enumerate(P):
@@ -179,7 +177,6 @@ class BallparkClassifier:
         t = 0
         while(True):
             t += 1
-
             yt, _ = self.solve_y(wt_1, v=v)
             wt, _ = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
             diff = np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)

@@ -9,7 +9,6 @@
 0.90 < beauty_salon < 1.00
 0.90 < bedroom < 1.00
 0.00 < bridge < 0.10
-0.00 < building < 0.10
 0.55 < campus < 0.75
 0.00 < canal < 0.10
 0.00 < canyon < 0.10
@@ -32,7 +31,6 @@
 0.00 < house - farm < 0.11
 0.00 < house - canal < 0.11
 0.00 < house - field < 0.11
-0.00 < house - building < 0.11
 0.00 < house - bridge < 0.11
 0.00 < house - forest < 0.11
 0.00 < house - castle < 0.11

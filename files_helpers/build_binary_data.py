@@ -1,14 +1,14 @@
 import os
 from shutil import copy
 ##### train
-output_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine"
+output_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets"
 
-src_root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\noisy_train_5"
+src_root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\stab_google"
 
-negative_classes = ["beach", "field", "nature", "parking", "road", "shop", "sport_area"]
-positive_classes = ["restaurant", "lobby", "dining_room"]
+negative_classes = ["Bag", "Boots", "Bottle", "Box", "Cup", "Pot", "Socks"]
+positive_classes = ["Knife", "Pencil", "Screwdriver", "Sword", "Scissors"]
 
-dest_dir_name = "polar_noisy_train_5"
+dest_dir_name = "stab_google_polar"
 
 dest_dir = os.path.join(output_path, dest_dir_name)
 negatives_dir = os.path.join(dest_dir, "0")

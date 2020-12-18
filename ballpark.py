@@ -58,8 +58,8 @@ def main():
     ballpark_object = BallparkClassifier if args.cls_method else BallparkModels
     b = ballpark_object(constraints, train_bags)
     print("Start ballpark learning")
-    w_t, y_t, prob_value = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
-    np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
+    # w_t, y_t, prob_value = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
+    # np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
     w_t = np.load(os.path.join(args.output_path, "ballpark_weights.npy"))
     all_labels = np.array([])
     all_preds = np.array([])
