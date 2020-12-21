@@ -1,0 +1,6 @@
+Bag < 0.3
+Boot < 0.3
+Knife >0.8
+Sword > 0.8
+Knife - Bag > 0.4
+Sword - Boot >0.4
