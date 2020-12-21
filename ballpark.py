@@ -4,6 +4,7 @@ import os
 from affordance_tools.ContraintsParser import ConstraintsParser
 from affordance_tools.BallparkModels import BallparkModels
 from affordance_tools.BallparkClassifier import BallparkClassifier
+from affordance_tools.BallparkClassifier_2 import BallparkClassifier2
 
 from tensorflow.keras.applications import vgg16
 from data_tools.dataloader import Dataloader
@@ -19,7 +20,8 @@ def get_args_parser():
     parser.add_argument('--constraints_file', '-cf',  type=str, required=True)
     parser.add_argument('--train_root_path',  type=str, required=True)
     parser.add_argument('--val_root_path',  type=str, required=True)
-    parser.add_argument('--cls_method',  action="store_true")
+    parser.add_argument('--cls_method',  type=str, choices=['test', 'class', 'regress'], default='valid')
+
     parser.add_argument('--features_level',  type=int, default=-2)
 
 
@@ -55,17 +57,27 @@ def main():
     val_bags = val_dataloader.split_into_bags(train=True)
 
     print("Initialize ballpark model")
-    ballpark_object = BallparkClassifier if args.cls_method else BallparkModels
+    if args.cls_method == "class":
+        ballpark_object = BallparkClassifier
+    elif args.cls_method == "regress":
+        ballpark_object = BallparkModels
+    else:
+        ballpark_object = BallparkModels
     b = ballpark_object(constraints, train_bags)
     print("Start ballpark learning")
-    # w_t, y_t, prob_value = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
+    # w_t, y_t, b_t = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
     # np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
+    # if b_t is not None:
+    #     np.save(os.path.join(args.output_path, "ballpark_bias"), b_t)
     w_t = np.load(os.path.join(args.output_path, "ballpark_weights.npy"))
+    b_t = None
+    if os.path.exists(os.path.join(args.output_path, "ballpark_bias")):
+        b_t = np.load(os.path.join(args.output_path, "ballpark_bias.npy"))
     all_labels = np.array([])
     all_preds = np.array([])
     all_paths = []
     for bag_name, bag in val_bags.items():
-        bag_preds, paths = make_predictions_for_bag(bag, w_t)
+        bag_preds, paths = make_predictions_for_bag(bag, w_t, b_t)
         if bag.path2label_dict is None:
             bag_labels = np.ones(len(paths)) * bag.bag_label
         else:

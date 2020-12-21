@@ -1,9 +1,9 @@
 import os
 from shutil import copy
 ##### train
-output_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets"
+output_path = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets"
 
-src_root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\stab_google"
+src_root = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets\\stab_google"
 
 negative_classes = ["Bag", "Boots", "Bottle", "Box", "Cup", "Pot", "Socks"]
 positive_classes = ["Knife", "Pencil", "Screwdriver", "Sword", "Scissors"]

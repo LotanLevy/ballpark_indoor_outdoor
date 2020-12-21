@@ -24,9 +24,12 @@ def get_data_size(bags_dict):
     return length, bag2indices_range
 
 
-def make_predictions_for_bag(bag, weights):
+def make_predictions_for_bag(bag, weights, bias):
     bag_features, paths = bag.get_features()
-    return bag_features.dot(weights), paths
+    pred = bag_features.dot(weights)
+    if bias is not None:
+        pred += bias
+    return pred, paths
 
 def display_roc_graph(output_path, title, preds, labels):
     fpr, tpr, _ = metrics.roc_curve(labels, preds)

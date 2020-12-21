@@ -9,7 +9,7 @@ from sklearn import svm
 
 
 
-class BallparkClassifier:
+class BallparkClassifier2:
     def __init__(self, constraints_parser, bags_dict):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict

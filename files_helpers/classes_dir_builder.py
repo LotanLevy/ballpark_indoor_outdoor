@@ -2,12 +2,12 @@ import os
 from shutil import copyfile
 
 
-SRC_ROOT = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_2016_07_26\\images\\training"
-DST_ROOT = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets"
+SRC_ROOT = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets\\ADE20K_2016_07_26\\ADE20K_2016_07_26\\images\\training"
+DST_ROOT = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets"
 
-ROOT_DIR_NAME = "ade20k_ballpark_exploration"
+ROOT_DIR_NAME = "ade20k_io_training"
 
-KEYS = {"garden": ["garden", "park", "lown", "patio"],"yard":["yard"], "field": ["field"], "balcony":["veranda""balcony"], "road":["road", "driveway"], "farm":["farm"], "bedroom":["bedroom"], "kitchen":["kitchen"], "shop":["shop", "store"], "market":["market", "bazaar"], "court":["court", "arena"], "restaurant":["restaurant"], "classroom": ["lecture", "class", "auditorium", "school"], "swimming_pool":["swim", "lido_deck"], "sitting_room":["living_room", "lobby", "sitting"], "theater":["theater"], "jacuzzi":["jacuzzi", "hot_tub"], "house":["house"], "dine_place": ["dine", "dinning"]}
+KEYS = {"indoor": ["indoor"],"outdoor":["outdoor"]}
 SUFFIXES = [".jpg"]
 
 DIRS_LEVELS = 3

@@ -8,6 +8,8 @@ import numpy as np
 from tensorflow.keras.applications import vgg16
 from evaluation_tools.evaluate import *
 from sklearn.metrics import confusion_matrix
+from sklearn import svm
+
 
 
 
@@ -96,7 +98,17 @@ def main():
     X = np.concatenate((positive_features, negative_features))
     y = np.concatenate((y_positive, y_negative))
 
-    w, b = svm_solve(X, y)
+    # w, b = svm_solve(X, y)
+
+    clf = svm.SVC(kernel='linear')
+
+
+    clf.fit(X, y)
+
+    w = clf.coef_.flatten()
+    b = clf.intercept_
+
+    print("X shape {} \ny shape {} \nw shape {} \nb shape {}".format(X.shape, y.shape, w.shape, b.shape))
 
 
 
@@ -115,8 +127,8 @@ def main():
     binary_labels = (all_labels == 1).astype(np.int)
     binary_preds = (all_preds == 1).astype(np.int)
 
-
-
+    np.save(os.path.join(args.output_path, "svm_weights"), w)
+    np.save(os.path.join(args.output_path, "svm_bias"), b)
 
     display_roc_graph(args.output_path, "indoor_outdoor", binary_preds, binary_labels)
     pred_classifications = get_classifications_by_roc(binary_preds, binary_labels)
