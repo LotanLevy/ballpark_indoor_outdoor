@@ -5,8 +5,6 @@ import numpy as np
 import itertools
 from cvxpy.expressions.constants import Constant
 import os
-from sklearn import svm
-
 
 
 class BallparkClassifier:
@@ -59,7 +57,7 @@ class BallparkClassifier:
         return scores
 
 
-    def solve_y(self, w, b, v=False):
+    def solve_y(self, w, v=False):
 
         yhat = cp.Variable(self.data_size)  # +intercept
 
@@ -73,7 +71,7 @@ class BallparkClassifier:
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = bag.get_features()
-            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w + b)))
+            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
 
             # upper and lower constraints
@@ -113,48 +111,26 @@ class BallparkClassifier:
         return y_t, prob.value
 
     def solve_w(self, yhat, reg_val=10 ** -1, v=False):
-        # w = cp.Variable(self.features_num)  # +intercept
-        # reg = cp.square(cp.norm(w, 2))
-        #
-        # loss = Constant(0)
+        w = cp.Variable(self.features_num)  # +intercept
+        reg = cp.square(cp.norm(w, 2))
 
-        self.clf = svm.SVC(C = reg_val, kernel='linear')
-
-
-        y = None
-        X = None
+        loss = Constant(0)
 
         for cls, bag_indices in self.bag2indices_range.items():
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = bag.get_features()
-            if y is None:
-                y = yhat[bag_indices]
-            else:
-                y = np.concatenate((y, yhat[bag_indices]))
-            if X is None:
-                X = bag_features
-            else:
-                X = np.concatenate((X, bag_features), axis=0)
-            # loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
+            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
-        print(X.shape)
-        print(y.shape)
+        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg))
 
-        self.clf.fit(X, y)
-        w = self.clf.coef_.flatten()
-        b = self.clf.intercept_
-
-        # # prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg))
-        #
-        # try:
-        #     prob.solve(verbose=v)
-        # except:
-        #     prob.solve(solver="SCS")
-        # w_t = np.squeeze(np.asarray(np.copy(w.value)))
-        # return w_t, prob.value
-        return w, b
+        try:
+            prob.solve(verbose=v)
+        except:
+            prob.solve(solver="SCS")
+        w_t = np.squeeze(np.asarray(np.copy(w.value)))
+        return w_t, prob.value
 
     def get_w0(self, reg_val=10 ** -1, v=False):
         w = cp.Variable(self.features_num)  # +intercept
@@ -198,26 +174,23 @@ class BallparkClassifier:
             wt_1 = np.load(weights_path+ ".npy")
         else:
             wt_1, _ = self.get_w0(reg_val, v)
-        print(wt_1)
-        bt_1 = np.array([0.0])
         t = 0
         while(True):
             t += 1
-            yt, _ = self.solve_y(wt_1, bt_1, v=v)
-            wt, bt = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
+            yt, _ = self.solve_y(wt_1, v=v)
+            wt, _ = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
             diff = np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)
-            if diff <= 10 **-5:
+            print(diff)
+            if (np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)) <= 10 **-5:
                 print("exit")
-                return wt, yt, bt
+                return wt, yt, None
             else:
                 print("{}: end of solve w_y iteration with distance {}".format(t, np.dot(wt - wt_1, wt - wt_1) / (
                             np.dot(wt_1, wt_1) + 0.000001)))
 
                 wt_1 = wt
-                bt_1 = bt
 
                 np.save(weights_path + "_{}".format(t), wt)
-                np.save(weights_path + "_bias_{}".format(t), bt)
 
 
 
