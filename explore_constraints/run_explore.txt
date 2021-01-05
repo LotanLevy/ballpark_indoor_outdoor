@@ -1,0 +1,13 @@
+beach > 0.7
+0.00 < dining_room < 0.05
+0.7 < field
+0.5 < garden < 0.9
+0.00 < lobby < 0.05
+0.5 < nature
+0.7 < park
+0.5 < parking
+0.0 < restaurant < 0.2
+0.1 < road < 0.7
+0.0 < shop < 0.05
+0.8 < sport_area
+0.7 < street

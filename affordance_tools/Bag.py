@@ -32,15 +32,22 @@ class Bag:
         plt.savefig("preds_for_cls_{}")
         plt.close(fig)
 
-    def get_features(self):
+    def get_features(self, max_size=None):
         features_mat = None
         paths = []
 
         # self.display_imagenet_prediction(self.cls_indices[0])
+        relevant_indices = self.cls_indices
+        if max_size is not None:
+            min_size = min([max_size, len(self.cls_indices)])
+            relevant_indices = np.random.choice(self.cls_indices, min_size, replace=False)
 
-
-        for i in self.cls_indices:
-            preprocessed_image = self.data_iterator[i][0]
+        for i in relevant_indices:
+            try:
+                preprocessed_image = self.data_iterator[i][0]
+            except:
+                print("Problem in loading " + self.data_iterator.filepaths[i])
+                continue
             paths.append(self.data_iterator.filepaths[i])
 
 

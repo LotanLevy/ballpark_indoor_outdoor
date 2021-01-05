@@ -29,15 +29,15 @@ def build_sub_classes_from_root(root_path, dest, sub_cls2label):
                 os.makedirs(sub_cls_dest)
             for im_name in os.listdir(sub_cls_path):
                 im_path = os.path.join(sub_cls_path, im_name)
-                im_dest = os.path.join(sub_cls_dest, im_name)
+                im_dest = os.path.join(sub_cls_dest, cls + "_" + im_name)
                 copyfile(im_path, im_dest)
                 # image = Image.open(im_path, 'r')
                 # image.save(os.path.join(sub_cls_dest, im_name))
 
 ##### train
 
-root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\noisy_train_10"
-dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\noisy_train_10_binary"
+root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\small_stab\\train75"
+dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\small_stab\\train75_binary"
 sub_cls2label = {"cant": "0", "can": "1"}
 build_sub_classes_from_root(root, dest, sub_cls2label)
 

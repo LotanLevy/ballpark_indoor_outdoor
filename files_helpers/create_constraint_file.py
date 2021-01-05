@@ -1,12 +1,12 @@
 import os
 import numpy as np
-labels_map = {"can": 1, "cant": 0}
+labels_map = {"1": 1, "0": 0}
 from affordance_tools.ContraintsParser import ConstraintsParser
 
 
-root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\bicycling\\train"
-dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\constraints\\bicycling_true_constraints_eps_03.txt"
-EPS = 0.3
+root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\tourist_place\\train"
+dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\explore_constraints\\tourist_true_constraints_eps_01.txt"
+EPS = 0.1
 
 def get_indoor_size(root_path, sub_cls2label):
     parts = dict()
@@ -60,7 +60,7 @@ def write_bounds(parts, dest):
         for cls, bounds in parts.items():
             f.write("{} < {} < {}\n".format(format(bounds[0], '.2f'), cls, format(bounds[1], '.2f')))
 
-# creates from splitted dir
+# creates constraints from splitted dir
 # true_indoor_percent = get_indoor_size(root, labels_map)
 # bounds = create_lower_and_upper_bounds(true_indoor_percent, EPS)
 # diff_bounds = create_mutual_bounds(true_indoor_percent, EPS)
@@ -109,8 +109,8 @@ def write_bounds_into_file(all_bounds_dict, dest_full_path):
 
 
 
-PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\constraints\\exploration_ride_road.txt"
-DEST = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\constraints\\exploration_ride_road_full.txt"
+PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\explore_constraints\\teaching_constraints.txt"
+DEST = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\explore_constraints\\teaching_constraints_full.txt"
 all_bounds = get_all_bounds(PATH)
 write_bounds_into_file(all_bounds, DEST)
 

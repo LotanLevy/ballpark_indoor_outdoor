@@ -1,0 +1,83 @@
+0.30 < courtroom - bar < 1.00
+0.50 < courtroom - barbershop < 1.00
+0.50 < courtroom - basement < 1.00
+0.50 < courtroom - casino < 1.00
+0.30 < courtroom - dining_room < 1.00
+0.50 < courtroom - food_court < 1.00
+0.50 < courtroom - hotel_room < 1.00
+0.60 < courtroom - kiosk < 1.00
+0.30 < courtroom - office < 1.00
+0.60 < courtroom - park < 1.00
+0.30 < courtroom - parlor < 1.00
+0.40 < lecture_room - bar < 1.00
+0.60 < lecture_room - barbershop < 1.00
+0.60 < lecture_room - basement < 1.00
+0.60 < lecture_room - casino < 1.00
+0.40 < lecture_room - dining_room < 1.00
+0.60 < lecture_room - food_court < 1.00
+0.60 < lecture_room - hotel_room < 1.00
+0.70 < lecture_room - kiosk < 1.00
+0.40 < lecture_room - office < 1.00
+0.70 < lecture_room - park < 1.00
+0.40 < lecture_room - parlor < 1.00
+0.10 < amphitheater - bar < 0.90
+0.30 < amphitheater - barbershop < 0.90
+0.30 < amphitheater - basement < 0.90
+0.30 < amphitheater - casino < 0.90
+0.10 < amphitheater - dining_room < 0.90
+0.30 < amphitheater - food_court < 0.90
+0.30 < amphitheater - hotel_room < 0.90
+0.40 < amphitheater - kiosk < 0.90
+0.10 < amphitheater - office < 0.90
+0.40 < amphitheater - park < 0.90
+0.10 < amphitheater - parlor < 0.90
+0.30 < auditorium - bar < 1.00
+0.50 < auditorium - barbershop < 1.00
+0.50 < auditorium - basement < 1.00
+0.50 < auditorium - casino < 1.00
+0.30 < auditorium - dining_room < 1.00
+0.50 < auditorium - food_court < 1.00
+0.50 < auditorium - hotel_room < 1.00
+0.60 < auditorium - kiosk < 1.00
+0.30 < auditorium - office < 1.00
+0.60 < auditorium - park < 1.00
+0.30 < auditorium - parlor < 1.00
+0.20 < chapel - bar < 1.00
+0.40 < chapel - barbershop < 1.00
+0.40 < chapel - basement < 1.00
+0.40 < chapel - casino < 1.00
+0.20 < chapel - dining_room < 1.00
+0.40 < chapel - food_court < 1.00
+0.40 < chapel - hotel_room < 1.00
+0.50 < chapel - kiosk < 1.00
+0.20 < chapel - office < 1.00
+0.50 < chapel - park < 1.00
+0.20 < chapel - parlor < 1.00
+0.40 < classroom - bar < 1.00
+0.60 < classroom - barbershop < 1.00
+0.60 < classroom - basement < 1.00
+0.60 < classroom - casino < 1.00
+0.40 < classroom - dining_room < 1.00
+0.60 < classroom - food_court < 1.00
+0.60 < classroom - hotel_room < 1.00
+0.70 < classroom - kiosk < 1.00
+0.40 < classroom - office < 1.00
+0.70 < classroom - park < 1.00
+0.40 < classroom - parlor < 1.00
+courtroom > 0.70
+lecture_room > 0.80
+0.50 < amphitheater < 0.90
+auditorium > 0.70
+chapel > 0.60
+classroom > 0.80
+bar < 0.40
+barbershop < 0.20
+basement < 0.20
+casino < 0.20
+dining_room < 0.40
+food_court < 0.20
+hotel_room < 0.20
+kiosk < 0.10
+office < 0.40
+park < 0.10
+parlor < 0.40

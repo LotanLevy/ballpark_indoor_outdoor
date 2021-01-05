@@ -4,14 +4,17 @@ import os
 from shutil import copyfile
 import random
 
-noisy_images_src = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_2016_07_26\\images\\training"
-dst_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\noisy_train_5"
-src_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\train"
+# noisy_images_src = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_2016_07_26\\images\\training"
+# dst_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\noisy_io\\noisy_train"
+# src_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\io\\train"
 SUFFIXES = [".jpg"]
+noisy_images_src = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\train"
+dst_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\noisy_dine\\noisy_train"
+src_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\train"
 
-DIRS_LEVELS = 3
+DIRS_LEVELS = 2
 
-NOISE = 5/100
+NOISE = 30
 
 
 def copy_src(src_dir, dst_dir):
@@ -47,4 +50,4 @@ def create_noisy_classes(src_dir, noisy_src, dst_dir, noise_size_for_cls = 0.1):
                 copyfile(path, os.path.join(dst_sub_cls_dir, file_name))
 
 
-create_noisy_classes(src_cls_path, noisy_images_src, dst_cls_path, noise_size_for_cls=NOISE)
+create_noisy_classes(src_cls_path, noisy_images_src, dst_cls_path+"_"+str(NOISE), noise_size_for_cls=NOISE/100)

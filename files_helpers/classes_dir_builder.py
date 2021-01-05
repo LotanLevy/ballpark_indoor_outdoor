@@ -2,10 +2,10 @@ import os
 from shutil import copyfile
 
 
-SRC_ROOT = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets\\ADE20K_2016_07_26\\ADE20K_2016_07_26\\images\\training"
-DST_ROOT = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets"
+SRC_ROOT = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_2016_07_26\\images\\training"
+DST_ROOT = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\datasets\\ballpark_datasets\\small_io"
 
-ROOT_DIR_NAME = "ade20k_io_training"
+ROOT_DIR_NAME = "train"
 
 KEYS = {"indoor": ["indoor"],"outdoor":["outdoor"]}
 SUFFIXES = [".jpg"]

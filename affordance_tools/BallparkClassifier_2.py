@@ -52,14 +52,14 @@ class BallparkClassifier2:
 
     def _get_score_by_cls_name(self, cls_name, theta):
         bag = self.bags_dict[cls_name]
-        bag_features, paths = bag.get_features()
+        bag_features, paths = self.get_bag_features_with_bias(bag)
         if bag_features is None:
             return None
         scores = (1. / len(bag)) * bag_features * theta
         return scores
 
 
-    def solve_y(self, w, b, v=False):
+    def solve_y(self, w, v=False):
 
         yhat = cp.Variable(self.data_size)  # +intercept
 
@@ -72,8 +72,8 @@ class BallparkClassifier2:
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
-            bag_features, paths = bag.get_features()
-            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w + b)))
+            bag_features, paths = self.get_bag_features_with_bias(bag)
+            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
 
             # upper and lower constraints
@@ -112,6 +112,14 @@ class BallparkClassifier2:
         y_t = np.squeeze(np.asarray(np.copy(yhat.value)))
         return y_t, prob.value
 
+    def get_bag_features_with_bias(self, bag):
+        bag_features, paths = bag.get_features()
+        bias_row = np.ones((bag_features.shape[0], 1))
+        bag_features = np.concatenate((bias_row, bag_features), axis=1)
+        return bag_features, paths
+
+
+
     def solve_w(self, yhat, reg_val=10 ** -1, v=False):
         # w = cp.Variable(self.features_num)  # +intercept
         # reg = cp.square(cp.norm(w, 2))
@@ -128,7 +136,7 @@ class BallparkClassifier2:
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
-            bag_features, paths = bag.get_features()
+            bag_features, paths = bag.get_features() # features without bias
             if y is None:
                 y = yhat[bag_indices]
             else:
@@ -154,10 +162,10 @@ class BallparkClassifier2:
         #     prob.solve(solver="SCS")
         # w_t = np.squeeze(np.asarray(np.copy(w.value)))
         # return w_t, prob.value
-        return w, b
+        return np.concatenate((b,w))
 
     def get_w0(self, reg_val=10 ** -1, v=False):
-        w = cp.Variable(self.features_num)  # +intercept
+        w = cp.Variable(self.features_num + 1)  # +intercept
         reg = cp.square(cp.norm(w, 2))
         P = []
         for pair, lower_bound in self.constraints_parser.cls2cls_diff_lower_bounds:
@@ -170,14 +178,14 @@ class BallparkClassifier2:
         if len(P) > 0:
             for idx, pair in enumerate(P):
                 bag1, bag2 = self.bags_dict[pair[0]], self.bags_dict[pair[1]]
-                bag1_features, paths = bag1.get_features()
-                bag2_features, paths = bag2.get_features()
+                bag1_features, paths = self.get_bag_features_with_bias(bag1)
+                bag2_features, paths = self.get_bag_features_with_bias(bag2)
 
                 features_sum1 = np.mean(bag1_features, axis=0)
-                assert(len(features_sum1) == 4096)
+                assert(len(features_sum1) == 4097)
 
                 features_sum2 = np.mean(bag2_features, axis=0)
-                assert(len(features_sum1) == 4096)
+                assert(len(features_sum2) == 4097)
 
                 constraints.append((features_sum1 @ w) >= (features_sum2 @ w) - psi[idx])
 
@@ -198,26 +206,24 @@ class BallparkClassifier2:
             wt_1 = np.load(weights_path+ ".npy")
         else:
             wt_1, _ = self.get_w0(reg_val, v)
+        print(wt_1.shape[0])
         print(wt_1)
-        bt_1 = np.array([0.0])
         t = 0
         while(True):
             t += 1
-            yt, _ = self.solve_y(wt_1, bt_1, v=v)
-            wt, bt = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
+            yt, _ = self.solve_y(wt_1, v=v)
+            wt = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
             diff = np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)
             if diff <= 10 **-5:
                 print("exit")
-                return wt, yt, bt
+                return wt, yt, None
             else:
                 print("{}: end of solve w_y iteration with distance {}".format(t, np.dot(wt - wt_1, wt - wt_1) / (
                             np.dot(wt_1, wt_1) + 0.000001)))
 
                 wt_1 = wt
-                bt_1 = bt
 
                 np.save(weights_path + "_{}".format(t), wt)
-                np.save(weights_path + "_bias_{}".format(t), bt)
 
 
 

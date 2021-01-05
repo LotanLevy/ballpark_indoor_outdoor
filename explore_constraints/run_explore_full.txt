@@ -1,0 +1,54 @@
+
+0.65 < beach - dining_room < 1.00
+0.65 < beach - lobby < 1.00
+0.50 < beach - restaurant < 1.00
+0.00 < beach - road < 0.90
+0.65 < beach - shop < 1.00
+0.65 < field - dining_room < 1.00
+0.65 < field - lobby < 1.00
+0.50 < field - restaurant < 1.00
+0.00 < field - road < 0.90
+0.65 < field - shop < 1.00
+0.45 < garden - dining_room < 0.90
+0.45 < garden - lobby < 0.90
+0.30 < garden - restaurant < 0.90
+0.45 < garden - shop < 0.90
+0.45 < nature - dining_room < 1.00
+0.45 < nature - lobby < 1.00
+0.30 < nature - restaurant < 1.00
+0.45 < nature - shop < 1.00
+0.65 < park - dining_room < 1.00
+0.65 < park - lobby < 1.00
+0.50 < park - restaurant < 1.00
+0.00 < park - road < 0.90
+0.65 < park - shop < 1.00
+0.45 < parking - dining_room < 1.00
+0.45 < parking - lobby < 1.00
+0.30 < parking - restaurant < 1.00
+0.45 < parking - shop < 1.00
+0.05 < road - dining_room < 0.70
+0.05 < road - lobby < 0.70
+0.05 < road - shop < 0.70
+0.75 < sport_area - dining_room < 1.00
+0.75 < sport_area - lobby < 1.00
+0.60 < sport_area - restaurant < 1.00
+0.10 < sport_area - road < 0.90
+0.75 < sport_area - shop < 1.00
+0.65 < street - dining_room < 1.00
+0.65 < street - lobby < 1.00
+0.50 < street - restaurant < 1.00
+0.00 < street - road < 0.90
+0.65 < street - shop < 1.00
+beach > 0.70
+0.00 < dining_room < 0.05
+field > 0.70
+0.50 < garden < 0.90
+0.00 < lobby < 0.05
+nature > 0.50
+park > 0.70
+parking > 0.50
+0.00 < restaurant < 0.20
+0.10 < road < 0.70
+0.00 < shop < 0.05
+sport_area > 0.80
+street > 0.70

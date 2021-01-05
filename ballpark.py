@@ -20,7 +20,7 @@ def get_args_parser():
     parser.add_argument('--constraints_file', '-cf',  type=str, required=True)
     parser.add_argument('--train_root_path',  type=str, required=True)
     parser.add_argument('--val_root_path',  type=str, required=True)
-    parser.add_argument('--cls_method',  type=str, choices=['test', 'class', 'regress'], default='valid')
+    parser.add_argument('--cls_method',  type=str, default="regress", choices=['test', 'class', 'regress'])
 
     parser.add_argument('--features_level',  type=int, default=-2)
 
@@ -62,22 +62,19 @@ def main():
     elif args.cls_method == "regress":
         ballpark_object = BallparkModels
     else:
-        ballpark_object = BallparkModels
+        ballpark_object = BallparkClassifier2
     b = ballpark_object(constraints, train_bags)
     print("Start ballpark learning")
-    # w_t, y_t, b_t = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
+    # w_t, y_t, _ = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
     # np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
-    # if b_t is not None:
-    #     np.save(os.path.join(args.output_path, "ballpark_bias"), b_t)
+
     w_t = np.load(os.path.join(args.output_path, "ballpark_weights.npy"))
-    b_t = None
-    if os.path.exists(os.path.join(args.output_path, "ballpark_bias")):
-        b_t = np.load(os.path.join(args.output_path, "ballpark_bias.npy"))
+
     all_labels = np.array([])
     all_preds = np.array([])
     all_paths = []
     for bag_name, bag in val_bags.items():
-        bag_preds, paths = make_predictions_for_bag(bag, w_t, b_t)
+        bag_preds, paths = make_predictions_for_bag(bag, w_t)
         if bag.path2label_dict is None:
             bag_labels = np.ones(len(paths)) * bag.bag_label
         else:
@@ -85,7 +82,7 @@ def main():
 
         # bag_labels = np.array([bag.path2label_dict[path] for path in paths])
         all_labels = np.concatenate((all_labels, bag_labels))
-        if args.cls_method:
+        if args.cls_method == "test" or args.cls_method == "class":
             bag_preds = np.sign(bag_preds)
         all_preds = np.concatenate((all_preds, bag_preds))
         all_paths += paths

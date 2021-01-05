@@ -1,18 +1,25 @@
 import os
 from shutil import copy
 ##### train
-output_path = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets"
+output_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\teaching"
 
-src_root = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets\\stab_google"
+src_root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\teaching\\train"
 
-negative_classes = ["Bag", "Boots", "Bottle", "Box", "Cup", "Pot", "Socks"]
-positive_classes = ["Knife", "Pencil", "Screwdriver", "Sword", "Scissors"]
+negative_classes=['parlor', 'park', 'office', 'kiosk', 'hotel_room','food_court', 'dining_room', 'casino', 'basement', 'barbershop', 'bar']
+positive_classes=['courtroom', 'amphitheater', 'lecture_room', 'classroom', 'auditorium']
 
-dest_dir_name = "stab_google_polar"
+dest_dir_name = "train_polar"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
 
 dest_dir = os.path.join(output_path, dest_dir_name)
 negatives_dir = os.path.join(dest_dir, "0")
 positives_dir = os.path.join(dest_dir, "1")
+
+with open(os.path.join(output_path, dest_dir_name + "_classes_split.txt"), 'w') as f:
+    f.write("negative_classes={}".format(negative_classes))
+    f.write("\npositive_classes={}".format(positive_classes))
+
 
 
 os.makedirs(os.path.join(output_path, dest_dir_name))

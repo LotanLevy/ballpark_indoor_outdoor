@@ -1,0 +1,43 @@
+0.83 < abbey < 1.00
+0.90 < apse < 1.00
+0.75 < arch < 0.95
+0.00 < atrium < 0.18
+0.00 < attic < 0.10
+0.90 < basilica < 1.00
+0.10 < bridge < 0.30
+0.00 < building_facade < 0.19
+0.85 < castle < 1.00
+0.90 < cathedral < 1.00
+0.40 < chapel < 0.60
+0.90 < church < 1.00
+0.00 < city < 0.10
+0.90 < cloister < 1.00
+0.00 < corridor < 0.14
+0.50 < court_outdoor < 0.70
+0.00 < diner < 0.10
+0.90 < fortress < 1.00
+0.90 < great_hall < 1.00
+0.00 < house < 0.10
+0.00 < motel < 0.10
+0.00 < office_building < 0.10
+0.00 < corridor - office_building < 0.14
+0.00 < corridor - house < 0.14
+0.00 < corridor - diner < 0.14
+0.00 < corridor - attic < 0.14
+0.00 < corridor - city < 0.14
+0.00 < corridor - motel < 0.14
+0.00 < atrium - corridor < 0.15
+0.00 < building_facade - atrium < 0.11
+0.00 < bridge - building_facade < 0.20
+0.20 < chapel - bridge < 0.40
+0.00 < court_outdoor - chapel < 0.20
+0.15 < arch - court_outdoor < 0.35
+0.00 < abbey - arch < 0.18
+0.00 < castle - abbey < 0.12
+0.00 < church - castle < 0.15
+0.00 < cloister - castle < 0.15
+0.00 < basilica - castle < 0.15
+0.00 < fortress - castle < 0.15
+0.00 < great_hall - castle < 0.15
+0.00 < apse - castle < 0.15
+0.00 < cathedral - castle < 0.15

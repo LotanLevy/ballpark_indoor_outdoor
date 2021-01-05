@@ -10,6 +10,8 @@ import math
 from skimage.transform import resize
 import itertools
 import random
+from scipy.optimize import brentq
+from scipy.interpolate import interp1d
 
 
 
@@ -24,38 +26,60 @@ def get_data_size(bags_dict):
     return length, bag2indices_range
 
 
-def make_predictions_for_bag(bag, weights, bias):
+def make_predictions_for_bag(bag, weights):
     bag_features, paths = bag.get_features()
+    if(weights.shape[0] - bag_features.shape[1] == 1):
+        bias_row = np.ones((bag_features.shape[0], 1))
+        bag_features = np.concatenate((bias_row, bag_features), axis=1)
     pred = bag_features.dot(weights)
-    if bias is not None:
-        pred += bias
     return pred, paths
 
 def display_roc_graph(output_path, title, preds, labels):
-    fpr, tpr, _ = metrics.roc_curve(labels, preds)
+    fpr, tpr, thresholds = metrics.roc_curve(labels, preds)
 
     # AUC
     auc = metrics.auc(fpr, tpr)
 
+    eer= brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+    thresh = interp1d(fpr, thresholds)(eer)
+    print(eer)
+    print(thresh)
+
     # Plot the ROC curve
     fig = plt.figure()
     plt.plot(fpr, tpr, label='DeepOneClassification(AUC = %.2f)' % auc)
+    plt.scatter([eer], [1-eer], label="eer={}".format(eer))
     plt.legend()
     plt.title(title + 'ROC curve')
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.grid(True)
-    plt.savefig(os.path.join(output_path, title + "roc_graph.png"))
+    plt.savefig(os.path.join(output_path, "roc_graph_eer_{:.2f}_auc_{:.2f}.png".format(eer, auc)))
     plt.show()
     plt.close(fig)
     plt.clf()
     plt.cla()
+    return eer, auc
+
+
+def compute_roc_EER(fpr, tpr):
+    roc_EER = []
+    cords = zip(fpr, tpr)
+    for item in cords:
+        item_fpr, item_tpr = item
+        if item_tpr + item_fpr == 1.0:
+            roc_EER.append((item_fpr, item_tpr))
+    print(roc_EER)
+    assert (len(roc_EER) == 1.0)
+    return np.array(roc_EER)
 
 def get_classifications_by_roc(scores, labels):
     fpr, tpr, thresholds = metrics.roc_curve(labels, scores)
-    optimal_idx = np.argmax(tpr - fpr)
-    optimal_threshold = thresholds[optimal_idx]
-    return (scores >= optimal_threshold).astype(int)
+    # optimal_idx = np.argmax(tpr - fpr)
+    # optimal_threshold = thresholds[optimal_idx]
+    eer = brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+    thresh = interp1d(fpr, thresholds)(eer)
+    return (scores >= thresh).astype(int)
 
 def display_random_images(output_path, paths, size, title):
     random.shuffle(paths)
