@@ -80,6 +80,20 @@ class ModelPreds:
                 copyfile(self.paths[bag][i], os.path.join(bag_dir, score_string.replace(".", "_") + "_"+abs_name))
 
 
+    def plot_best_scored_images(self, num, image_size, output_path):
+        all_scores = np.array([], dtype=np.float)
+        all_paths = []
+        for bag in self.preds:
+            all_scores = np.concatenate((all_scores, self.preds[bag]))
+            all_paths += self.paths[bag]
+        relevant_indices = np.argsort(all_scores)[-1*(num):]
+        relevant_paths = [all_paths[i] for i in relevant_indices]
+        titles = ["%.2f" for i in relevant_indices]
+        row = create_row_images(relevant_paths, image_size)
+        plot_row_and_scores(titles,
+                            row, image_size, "{}_best_scored_images".format(self.name), output_path)
+
+
 
 
 
@@ -171,7 +185,6 @@ def plot_row_and_scores(titles, row, images_size, name, output_path):
         left=False,  # ticks along the bottom edge are off
         right=False,  # ticks along the top edge are off
         labelleft=False)  # labels along the bottom edge are off
-
     plt.imshow(row)
     ticks_vals = np.arange(images_size // 2, (len(titles)) * images_size, step=images_size)
     plt.xticks(ticks_vals, titles, fontsize=8, rotation=30)
@@ -238,6 +251,7 @@ def main():
     #     for model in models:
     #         model.set_features(bag_name, bag_features, bag_paths)
 
+
     val_dataloader = Dataloader(args.data_path, 1, args.input_size, 0, preprocess_func=preprocessing_func, )
     val_bags = val_dataloader.split_into_bags(train=True)
     for bag_name, bag in val_bags.items():
@@ -257,6 +271,7 @@ def main():
             model.set_features(bag_name, bag_features, bag_paths)
     for model in models:
         model.models_results(args.output_path, 10)
+        model.plot_best_scored_images(10, args.image_size, args.output_path)
 
     with open( os.path.join(args.output_path,"ranked_classes.txt"), 'w') as f:
         for model in models:
