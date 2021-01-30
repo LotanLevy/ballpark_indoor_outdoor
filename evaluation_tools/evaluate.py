@@ -29,6 +29,7 @@ def get_data_size(bags_dict):
 def make_predictions_for_bag(bag, weights):
     bag_features, paths = bag.get_features()
     if(weights.shape[0] - bag_features.shape[1] == 1):
+        bag_features, paths = bag.get_features()
         bias_row = np.ones((bag_features.shape[0], 1))
         bag_features = np.concatenate((bias_row, bag_features), axis=1)
     pred = bag_features.dot(weights)

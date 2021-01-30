@@ -126,7 +126,7 @@ class BallparkClassifier2:
         #
         # loss = Constant(0)
 
-        self.clf = svm.SVC(C = reg_val, kernel='linear')
+        self.clf = svm.SVC(kernel='linear')
 
 
         y = None

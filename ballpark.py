@@ -28,7 +28,7 @@ def get_args_parser():
 
     parser.add_argument('--input_size',  type=int, default=224)
     parser.add_argument('--split_val',  type=int, default=0.2)
-    parser.add_argument('--test_type',  type=str, choices=['explore', 'valid'], default='valid')
+    parser.add_argument('--test_type',  type=str, choices=['explore', 'valid', 'pass'], default='valid')
 
 
 
@@ -50,11 +50,9 @@ def main():
             wr.write(content)
     print("Initialize dataloader")
     train_dataloader = Dataloader(args.train_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func)
-    val_dataloader = Dataloader(args.val_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func, labels_map_path=args.labels_map_path)
 
     print("Split data into bags")
     train_bags = train_dataloader.split_into_bags(train=True)
-    val_bags = val_dataloader.split_into_bags(train=True)
 
     print("Initialize ballpark model")
     if args.cls_method == "class":
@@ -65,9 +63,14 @@ def main():
         ballpark_object = BallparkClassifier2
     b = ballpark_object(constraints, train_bags)
     print("Start ballpark learning")
-    # w_t, y_t, _ = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
-    # np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
+    w_t, y_t, _ = b.solve_w_y(weights_path=os.path.join(args.output_path, "ballpark_weights"))
+    np.save(os.path.join(args.output_path, "ballpark_weights"), w_t)
 
+    if args.test_type == "pass":
+        return
+
+    val_dataloader = Dataloader(args.val_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func, labels_map_path=args.labels_map_path)
+    val_bags = val_dataloader.split_into_bags(train=True)
     w_t = np.load(os.path.join(args.output_path, "ballpark_weights.npy"))
 
     all_labels = np.array([])
@@ -83,7 +86,7 @@ def main():
         # bag_labels = np.array([bag.path2label_dict[path] for path in paths])
         all_labels = np.concatenate((all_labels, bag_labels))
         if args.cls_method == "test" or args.cls_method == "class":
-            bag_preds = np.sign(bag_preds)
+            bag_preds = np.max(0, np.sign(bag_preds))
         all_preds = np.concatenate((all_preds, bag_preds))
         all_paths += paths
         # display_predictions_for_bag(args.output_path, bag, bag_preds, paths)

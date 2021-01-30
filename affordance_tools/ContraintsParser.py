@@ -16,6 +16,8 @@ class ConstraintsParser:
         self.cls2cls_diff_lower_bounds = []# array of pair(pair, float)
         self.cls2cls_diff_upper_bounds = []# array of pair(pair, float)
 
+        self.all_classes = set()
+
         self.lower_bounds = dict()
         self.upper_bounds = dict()
 
@@ -25,6 +27,7 @@ class ConstraintsParser:
             lines = f.readlines()
             for line in lines:
                 self.parse_line(line.strip())
+        print(self.all_classes)
 
     def get_constraints_string(self):
         constraints_str = ""
@@ -52,6 +55,9 @@ class ConstraintsParser:
             if len(classes) > 1:
                 # cls1, cls2 = m_diff.group(1).strip(), m_diff.group(2).strip()
                 cls1, cls2 = classes[0].strip(), classes[1].strip()
+                self.all_classes.add(cls1)
+                self.all_classes.add(cls2)
+
 
                 if lower is not None:
                     self.cls2cls_diff_lower_bounds.append(((cls1, cls2), lower))
@@ -61,6 +67,8 @@ class ConstraintsParser:
                 self.constrained.add(cls2)
             else:
                 cls_name = cls_name.strip()
+                self.all_classes.add(cls_name)
+
                 if lower is not None:
                     self.lower_bounds[cls_name] = lower
                 if upper is not None:

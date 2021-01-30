@@ -59,12 +59,20 @@ class Dataloader:
                                             weights='imagenet')
         return Model(inputs=self.model.input, outputs=self.model.layers[features_level].output)
 
+    def get_DOC_features_model(self, input_size, features_level=-2):
+        ckpt_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\doc_experiments\\buy\\test2\\ckpts"
+        self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
+                                            weights='imagenet')
+        self.model.load_weights(os.path.join(ckpt_path, "weights_after_{}_epochs".format(5))).expect_partial()
+        return Model(inputs=self.model.input, outputs=self.model.layers[features_level].output)
 
 
     def split_into_bags(self, train=True):
         data_iter = self.train_iter if train else self.val_iter
         bags = dict()
         model = self.get_features_model(self.input_size, self.features_level)
+        # model = self.get_DOC_features_model(self.input_size, self.features_level)
+
         for cls_name, label in data_iter.class_indices.items():
             items_indices = np.where(data_iter.labels == label)[0]
             bag = Bag(cls_name, data_iter, items_indices, bag_label=label, model = model, path2label_dict=self.paths2labels_dict)

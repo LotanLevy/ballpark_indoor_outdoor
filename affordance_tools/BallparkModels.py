@@ -3,7 +3,7 @@ import numpy as np
 import itertools
 from cvxpy.expressions.constants import Constant
 
-
+NORM = 2
 
 class BallparkModels:
     def __init__(self, constraints_parser, bags_dict):
@@ -46,8 +46,6 @@ class BallparkModels:
 
 
 
-
-
     def _get_score_by_cls_name(self, cls_name, theta):
         bag = self.bags_dict[cls_name]
         bag_features, paths = bag.get_features()
@@ -60,7 +58,7 @@ class BallparkModels:
         if not self.legal_constraints:
             return None
         theta = cp.Variable(self.features_num)
-        reg = cp.square(cp.norm(theta, 2))
+        reg = cp.square(cp.norm(theta, NORM))
 
         constraints = []
         for pair, lower_bound in self.constraints_parser.cls2cls_diff_lower_bounds:
@@ -96,7 +94,7 @@ class BallparkModels:
 
             return None
         w = cp.Variable(self.features_num)  # +intercept
-        reg = cp.square(cp.norm(w, 2))
+        reg = cp.square(cp.norm(w, NORM))
         yhat = cp.Variable(self.data_size)  # +intercept
 
         constraints = []
@@ -104,14 +102,27 @@ class BallparkModels:
 
         constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
+        constraints.append(w >= 0)
+        constraints.append(cp.sum(w) >= 0)
+
+        ce_reg = cp.sum( cp.entr( w ) )
+
+
+
+
 
 
         for cls, bag_indices in self.bag2indices_range.items():
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
+            if cls not in self.constraints_parser.all_classes:
+                continue
             bag_features, paths = bag.get_features()
+
             loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
+
+
             if cls in self.constraints_parser.lower_bounds:
                 lower_bound = self.constraints_parser.lower_bounds[cls]
             else:
@@ -138,7 +149,10 @@ class BallparkModels:
             constraints.append((1. / (len(high_bag))) * cp.sum(yhat[high_bag_idx_range]) -
                                (1. / (len(low_bag))) * cp.sum(yhat[low_bag_idx_range]) <= upper_bound)
 
-        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg), constraints=constraints)
+        print(ce_reg)
+        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg), constraints=constraints)
+        # prob = cp.Problem(cp.Minimize(-1*reg_val*ce_reg), constraints=constraints)
+
         try:
             prob.solve(verbose=v)
         except:
