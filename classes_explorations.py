@@ -14,6 +14,8 @@ import matplotlib.gridspec as gridspec
 import scipy.stats
 from shutil import copyfile
 from files_helpers.best_classes_visualization import zipped_images, plot_image_without_axes
+from args_helper import get_features_model, get_preprocessing_func_by_name
+
 
 
 class ModelPreds:
@@ -127,7 +129,6 @@ class ModelPreds:
         dir_path = os.path.join(output_path, "sorted_images_{}_from_{}_to_{}".format(self.name, low_percent, high_percent))
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
-
 
         if relevant_classes is None:
             sorted_keys = [k for k, v in sorted(self.means.items(), key=lambda item: item[1])]
@@ -248,6 +249,8 @@ def get_args_parser():
     parser.add_argument('--max_files',  type=int, default=10)
     parser.add_argument('--best_num',  type=int, default=10)
     parser.add_argument('--best_type',  type=str, default="mean", choices=["mean", "max"])
+    parser.add_argument('--nn_model', type=str, default="vgg16", choices=["vgg16, resnet"])
+
 
 
 
@@ -326,6 +329,10 @@ def plot_row_and_scores(titles, row, images_size, name, output_path):
     plt.savefig(os.path.join(output_path, name), dpi=300, bbox_inches='tight')
     plt.close("all")
 
+def get_bag_features_with_bias(bag_features):
+    bias_row = np.ones((bag_features.shape[0], 1))
+    bag_features = np.concatenate((bias_row, bag_features), axis=1)
+    return bag_features
 
 def get_prediction_func(model_type, ckpt_path):
     if model_type == "svm":
@@ -334,7 +341,7 @@ def get_prediction_func(model_type, ckpt_path):
         return lambda features: np.dot(w, features.T) + b
     else:
         w = np.load(os.path.join(ckpt_path, "ballpark_weights.npy"))
-        return lambda features: features.dot(w)
+        return lambda features: features.dot(w) if features.shape[0] == w.shape[0] else get_bag_features_with_bias(features).dot(w)
 
 def main():
     args = get_args_parser().parse_args()
@@ -350,7 +357,7 @@ def main():
     if args.ballpark_ckpt_path is not None:
         models.append(ModelPreds("ballpark", "ballpark", args.ballpark_ckpt_path))
 
-    preprocessing_func = lambda input_data: vgg16.preprocess_input(np.copy(input_data.astype('float32')))
+    # preprocessing_func = lambda input_data: vgg16.preprocess_input(np.copy(input_data.astype('float32')))
 
     counter = 0
     # for bag_name in os.listdir(args.data_path):
@@ -389,8 +396,9 @@ def main():
         excluded_bags = content.split(",")
         excluded_bags_clean = [bag.strip().replace("'", "") for bag in excluded_bags]
         print(excluded_bags_clean)
-
-    val_dataloader = Dataloader(args.data_path, 1, args.input_size, 0, preprocess_func=preprocessing_func, )
+    nn_model = get_features_model(args.nn_model, args.input_size, features_level=args.features_level)
+    preprocessing_func = get_preprocessing_func_by_name(args.nn_model)
+    val_dataloader = Dataloader(nn_model, args.data_path, 1, args.input_size, 0, preprocess_func=preprocessing_func, )
     val_bags = val_dataloader.split_into_bags(train=True)
     for bag_name, bag in val_bags.items():
         if bag_name in excluded_bags_clean:

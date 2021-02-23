@@ -12,6 +12,10 @@ import itertools
 import random
 from scipy.optimize import brentq
 from scipy.interpolate import interp1d
+from sklearn.metrics import confusion_matrix
+import csv
+
+
 
 
 
@@ -46,6 +50,12 @@ def display_roc_graph(output_path, title, preds, labels):
     print(eer)
     print(thresh)
 
+    pred_classifications = get_classifications_by_roc(preds, labels)
+    tn, fp, fn, tp = confusion_matrix(labels, pred_classifications).ravel()
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f_score = 2 * (precision * recall) / (precision + recall)
+
     # Plot the ROC curve
     fig = plt.figure()
     plt.plot(fpr, tpr, label='DeepOneClassification(AUC = %.2f)' % auc)
@@ -55,12 +65,15 @@ def display_roc_graph(output_path, title, preds, labels):
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.grid(True)
-    plt.savefig(os.path.join(output_path, "roc_graph_eer_{:.2f}_auc_{:.2f}.png".format(eer, auc)))
+    plt.savefig(os.path.join(output_path, "roc_graph_eer_{:.2f}_auc_{:.2f}_fscore_{:.2f}.png".format(eer, auc, f_score)))
     plt.show()
     plt.close(fig)
     plt.clf()
     plt.cla()
-    return eer, auc
+
+
+
+    return eer, auc, f_score
 
 
 def compute_roc_EER(fpr, tpr):
@@ -191,3 +204,26 @@ def create_images_graph(output_path, paths, scores, zoom=0.08, columns=20, max_o
     # plt.title(name)
     plt.savefig(os.path.join(output_path, "scores_visualization_indoor_outdoor.png"), dpi=500)
     plt.show()
+
+
+class Evaluator:
+
+    def get_titles(self):
+        return ['tn', 'fp', 'fn', 'tp', 'accuracy', 'precision', 'recall', 'f_score']
+
+    def get_evaluation_titles(self, true_labels, preds):
+        tn, fp, fn, tp = confusion_matrix(true_labels, preds).ravel()
+        sum_data = fp + fn + tp + tn
+
+        accuracy = (tp + tn) / sum_data
+        precision = tp / (tp + fp)
+        recall = tp / (tp + fn)
+        f_score = 2 * (precision * recall) / (precision + recall)
+        return {'tn': tn, 'fp': fp, 'fn': fn, 'tp': tp, 'accuracy':accuracy, 'precision':precision, 'recall':recall, 'f_score':f_score}
+
+def save_evaluations(titles, evaluations_for_models, output_path):
+    with open(os.path.join(output_path, 'evaluations.csv'), 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["model_name"] + titles)
+        for model_name in evaluations_for_models:
+            writer.writerow([model_name]+[evaluations_for_models[model_name][title] for title in titles])

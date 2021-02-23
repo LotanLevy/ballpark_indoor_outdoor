@@ -4,24 +4,26 @@ from affordance_tools.Bag import Bag
 import os
 from tensorflow.keras.models import Model
 
-from PIL import ImageFile
+from PIL import ImageFile, Image
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Dataloader:
-    def __init__(self, root_dir, batch_size, input_size, split_val, features_level=-2, shuffle=False,
+    def __init__(self, nn_model, root_dir, batch_size, input_size, split_val, features_level=-2, shuffle=False,
                                   preprocess_func=lambda x: x, use_aug=False, labels_map_path=None):
         self.root_dir = root_dir
         self.input_size = input_size
         self.labels = "inferred"
         self.paths2labels_dict = None if labels_map_path is None else self._parse_label_map(labels_map_path)
         self.features_level = features_level
+        self.preprocess_func = preprocess_func
 
         self.train_iter, self.val_iter = self._get_iterators_by_root_dir(root_dir, batch_size, (input_size, input_size),
                                                                          split_val,
                                                                          shuffle=shuffle,
                                                                          preprocess_func=preprocess_func,
                                                                          use_aug=use_aug)
+        self.model = nn_model
 
     def _parse_label_map(self, map_path):
         paths2labels_dict = dict()
@@ -54,23 +56,42 @@ class Dataloader:
             for path in self.train_iter.filepaths:
                 f.write(path + "\n")
 
-    def get_features_model(self, input_size, features_level=-2):
-        self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
-                                            weights='imagenet')
-        return Model(inputs=self.model.input, outputs=self.model.layers[features_level].output)
+    # def get_features_model(self, input_size, features_level=-2):
+    #     self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
+    #                                         weights='imagenet')
+    #     return Model(inputs=self.model.input, outputs=self.model.layers[features_level].output)
 
-    def get_DOC_features_model(self, input_size, features_level=-2):
-        ckpt_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\doc_experiments\\buy\\test2\\ckpts"
-        self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
-                                            weights='imagenet')
-        self.model.load_weights(os.path.join(ckpt_path, "weights_after_{}_epochs".format(5))).expect_partial()
-        return Model(inputs=self.model.input, outputs=self.model.layers[features_level].output)
+    # def get_DOC_features_model(self, input_size, features_level=-2):
+    #     ckpt_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\doc_experiments\\buy\\test2\\ckpts"
+    #     self.model = tf.keras.applications.VGG16(include_top=True, input_shape=(input_size, input_size, 3),
+    #                                         weights='imagenet')
+    #     self.model.load_weights(os.path.join(ckpt_path, "weights_after_{}_epochs".format(5))).expect_partial()
+    #     return Model(inputs=self.model.input, outputs=self.model.layers[features_level].output)
+
+    def get_all_features(self, train_data=True, max_size=None):
+        dataloader = self.train_iter if train_data else self.val_iter
+        features_model = self.model
+
+        features_mat = None
+        paths = []
+        for i, path in enumerate(dataloader.filepaths):
+            try:
+                preprocessed_image = dataloader[i][0]
+            except:
+                print("Problem in loading " + path)
+                continue
+            paths.append(path)
+
+            features_vec = features_model(preprocessed_image)
+            features_mat = features_vec if features_mat is None else np.concatenate((features_mat, features_vec))
+        return features_mat, paths
+
 
 
     def split_into_bags(self, train=True):
         data_iter = self.train_iter if train else self.val_iter
         bags = dict()
-        model = self.get_features_model(self.input_size, self.features_level)
+        model = self.model
         # model = self.get_DOC_features_model(self.input_size, self.features_level)
 
         for cls_name, label in data_iter.class_indices.items():

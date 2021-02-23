@@ -5,6 +5,7 @@ import numpy as np
 import itertools
 from cvxpy.expressions.constants import Constant
 from sklearn.metrics import confusion_matrix
+from scipy.special import softmax
 import os
 from sklearn import svm
 
@@ -14,7 +15,7 @@ import datetime
 
 
 
-class BallparkClassifier2:
+class EntropyClassifier:
     def __init__(self, constraints_parser, bags_dict):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict
@@ -63,20 +64,22 @@ class BallparkClassifier2:
         scores = (1. / len(bag)) * bag_features * theta
         return scores
 
-    def softmax(self, x):
-        # first shift the values of f so that the highest number is 0:
-        x -= np.max(x)  # f becomes [-666, -333, 0]
-        p = np.exp(x) / np.sum(np.exp(x))  # safe to do, gives the correct answer
-        return p
 
 
-    def solve_y(self, w, v=False):
+    # def softmax(self, x):
+    #     # first shift the values of f so that the highest number is 0:
+    #     x -= np.max(x)  # f becomes [-666, -333, 0]
+    #     p = np.exp(x) / np.sum(np.exp(x), axis=1)  # safe to do, gives the correct answer
+    #     return p
+
+
+    def solve_y(self, W, v=False):
 
         yhat = cp.Variable(self.data_size)  # +intercept
 
         constraints = []
         loss = Constant(0)
-        constraints.append(yhat >= -1)
+        constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
 
         for cls, bag_indices in self.bag2indices_range.items():
@@ -84,15 +87,11 @@ class BallparkClassifier2:
             if len(bag) == 0:
                 print(cls + " is empty")
             bag_features, paths = self.get_bag_features_with_bias(bag)
-            loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
-            # print(bag_features @ w)
-            # preds = self.softmax(bag_features @ w)
-            # print(preds)
-            # if np.any(preds == 0):
-            #     print("preds == 0")
-            #
-            #
-            # loss += cp.sum(-cp.multiply(cp.pos(yhat[bag_indices]), cp.log(preds)))
+            preds = np.dot(W, bag_features.T)
+
+
+
+            loss += cp.sum(-cp.multiply(yhat[bag_indices], cp.log(preds))-cp.multiply(1-yhat[bag_indices], cp.log(1-preds)))
 
             # upper and lower constraints
             if cls in self.constraints_parser.lower_bounds:
@@ -124,7 +123,7 @@ class BallparkClassifier2:
 
         prob = cp.Problem(cp.Minimize(loss / self.data_size), constraints=constraints)
         try:
-            prob.solve(verbose=True)
+            prob.solve(verbose=v)
         except:
             prob.solve(solver="SCS")
         y_t = np.squeeze(np.asarray(np.copy(yhat.value)))
@@ -139,30 +138,41 @@ class BallparkClassifier2:
 
 
     def solve_w(self, yhat, reg_val=10 ** -1, v=False):
-        self.clf = svm.SVC(kernel='linear')
-        y = None
-        X = None
+        w = cp.Variable(self.features_num+1)  # +intercept
+        reg = cp.square(cp.norm(w, 2))
+
+        loss = Constant(0)
+        constraints = []
+
 
         for cls, bag_indices in self.bag2indices_range.items():
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
-            bag_features, paths = bag.get_features() # features without bias
-            if y is None:
-                y = yhat[bag_indices]
-            else:
-                y = np.concatenate((y, yhat[bag_indices]))
-            if X is None:
-                X = bag_features
-            else:
-                X = np.concatenate((X, bag_features), axis=0)
-            # loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
+            bag_features, paths = self.get_bag_features_with_bias(bag)
+            preds = bag_features @ w
+            loss += cp.sum(
+                -cp.multiply(yhat[bag_indices], cp.log(preds)) - cp.multiply(1 - yhat[bag_indices], cp.log(1 - preds)))
 
-        self.clf.fit(X, y)
-        w = self.clf.coef_.flatten()
-        b = self.clf.intercept_
+            constraints.append((bag_features @ w) >= 0)
+            constraints.append((bag_features @ w) <= 1)
 
-        return np.concatenate((b,w))
+        # for cls, bag_indices in self.bag2indices_range.items():
+        #     bag = self.bags_dict[cls]
+        #     if len(bag) == 0:
+        #         print(cls + " is empty")
+        #     bag_features, paths = self.get_bag_features_with_bias(bag)
+        #     constraints.append((bag_features @ w) >= 0)
+        #     constraints.append((bag_features @ w) <= 1)
+
+        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg), constraints=constraints)
+
+        try:
+            prob.solve(verbose=v)
+        except:
+            prob.solve(solver="SCS")
+        w_t = np.squeeze(np.asarray(np.copy(w.value)))
+        return w_t
 
 
 
@@ -197,14 +207,22 @@ class BallparkClassifier2:
         else:
             print("_________________________________")
             print("P set is empty, w0=0")
+        for cls, bag_indices in self.bag2indices_range.items():
+            bag = self.bags_dict[cls]
+            if len(bag) == 0:
+                print(cls + " is empty")
+            bag_features, paths = self.get_bag_features_with_bias(bag)
+            constraints.append((bag_features @ w) >= 0)
+            constraints.append((bag_features @ w) <= 1)
+
+
         prob = cp.Problem(cp.Minimize((cp.sum(psi) / len(P)) + reg_val * reg), constraints=constraints)
 
         try:
-            prob.solve(verbose=True)
+            prob.solve(verbose=v)
         except:
             prob.solve(solver="SCS")
         w_0 = np.squeeze(np.asarray(np.copy(w.value)))
-        print(w_0.shape)
         return w_0, prob.value
 
     def test_on_train(self, w, constraints_limit = 0.3):
@@ -245,7 +263,11 @@ class BallparkClassifier2:
                 all_paths += paths
             assert train_features.shape[0] == all_labels.shape[0]
 
-        preds = np.sign(train_features @ w)
+        preds = np.around( np.dot(w, train_features.T))
+        preds[np.where(preds==0)] = -1
+        print(all_labels.shape)
+        print(preds.shape)
+
         tn, fp, fn, tp = confusion_matrix(all_labels, preds).ravel()
         sum_data = fp + fn + tp + tn
 
@@ -270,8 +292,6 @@ class BallparkClassifier2:
         #     wt_1 = np.load(weights_path+ ".npy")
         # else:
         wt_1, _ = self.get_w0(reg_val, v)
-        print(wt_1.shape[0])
-        print(wt_1)
         t = 0
         metrics = ['accuracy', 'precision', 'recall', 'f_score']
         current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -291,7 +311,7 @@ class BallparkClassifier2:
         while(True):
             t += 1
             yt, _ = self.solve_y(wt_1, v=v)
-            wt = self.solve_w(np.sign(yt), reg_val=reg_val, v=v)
+            wt = self.solve_w(np.round(yt), reg_val=reg_val, v=v)
             diff = np.dot(wt-wt_1, wt-wt_1) / (np.dot(wt_1, wt_1) + 0.000001)
             # test the loss on training data
             accuracy, precision, recall, f_score = self.test_on_train(wt, constraints_limit=0.2)

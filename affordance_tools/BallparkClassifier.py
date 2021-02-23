@@ -169,11 +169,13 @@ class BallparkClassifier:
         return w_0, prob.value
 
 
-    def solve_w_y(self, reg_val=10 ** -1, v=False, weights_path=None):
-        if weights_path is not None and os.path.exists(weights_path + ".npy"):
-            wt_1 = np.load(weights_path+ ".npy")
-        else:
-            wt_1, _ = self.get_w0(reg_val, v)
+    def solve_w_y(self, reg_val=10 ** -1, v=False, weights_path=None, reg_type=None, output_path=os.getcwd()):
+        # if weights_path is not None and os.path.exists(weights_path + ".npy"):
+        #     wt_1 = np.load(weights_path+ ".npy")
+        # else:
+        #     wt_1, _ = self.get_w0(reg_val, v)
+        wt_1, _ = self.get_w0(reg_val, v)
+
         t = 0
         while(True):
             t += 1

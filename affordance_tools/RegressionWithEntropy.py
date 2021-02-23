@@ -5,7 +5,7 @@ from cvxpy.expressions.constants import Constant
 
 NORM = 2
 
-class BallparkModels:
+class RegressionWithEntropy:
     def __init__(self, constraints_parser, bags_dict):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict
@@ -89,27 +89,29 @@ class BallparkModels:
         w_t = np.squeeze(np.asarray(np.copy(theta.value)))
         return w_t
 
-    def solve_w_y(self, reg_val=10**-1, v=False, weights_path=None):
+    def solve_w_y(self, reg_val=10**-1, v=False, weights_path=None, reg_type="l2", output_path=None):
         if not self.legal_constraints:
-
-            return None
+            return None,None,None
         w = cp.Variable(self.features_num)  # +intercept
-        reg = cp.square(cp.norm(w, NORM))
+        # reg = cp.square(cp.norm(w, NORM))
         yhat = cp.Variable(self.data_size)  # +intercept
+        psi = cp.Variable(1)
 
         constraints = []
         loss = Constant(0)
+        entropy = Constant(0)
 
         constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
-        constraints.append(w >= 0)
-        constraints.append(cp.sum(w) >= 0)
 
-        ce_reg = cp.sum( cp.entr( w ) )
-
-
-
-
+        if reg_type == "l2":
+            reg = cp.square(cp.norm(w, NORM))
+        elif reg_type == "entropy":
+            reg = -cp.sum(cp.entr(w))
+        else:
+            print("wrong reg")
+            return None, None, None
+        print(reg_type, reg)
 
 
         for cls, bag_indices in self.bag2indices_range.items():
@@ -120,8 +122,14 @@ class BallparkModels:
                 continue
             bag_features, paths = bag.get_features()
 
+            # loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
+            preds = bag_features @ w
             loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
+            entropy += cp.sum(-cp.multiply(yhat[bag_indices], cp.log(preds))-cp.multiply(1-yhat[bag_indices], cp.log(1-preds)))
 
+
+            constraints.append((preds) >= 0)
+            constraints.append((preds) <= 1)
 
             if cls in self.constraints_parser.lower_bounds:
                 lower_bound = self.constraints_parser.lower_bounds[cls]
@@ -149,9 +157,11 @@ class BallparkModels:
             constraints.append((1. / (len(high_bag))) * cp.sum(yhat[high_bag_idx_range]) -
                                (1. / (len(low_bag))) * cp.sum(yhat[low_bag_idx_range]) <= upper_bound)
 
-        print(ce_reg)
-        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg), constraints=constraints)
-        # prob = cp.Problem(cp.Minimize(-1*reg_val*ce_reg), constraints=constraints)
+        constraints.append(entropy <= psi)
+
+        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg), constraints=constraints)
+        # prob = cp.Problem(cp.Minimize(psi), constraints=constraints)
+
 
         try:
             prob.solve(verbose=v)

@@ -76,7 +76,7 @@ def place_title_with_image(image, title, title_pos="bottom"):
             return image
         else:
             print("unrecognized direction")
-    return None
+    return image
 
 def zipped_images(paths, title, images_size, vertical=False, title_pos="bottom", max_in_line=10):
     titled_images = []
@@ -107,7 +107,7 @@ def stack_with_spaces(images, vertical=False, space=10):
         if len(to_stack) != 0:
             to_stack.append(get_space())
         to_stack.append(image)
-    stack_func = np.vstack if vertical else np.hstack
+    stack_func = lambda input:np.vstack(reversed(input)) if vertical else np.hstack(input)
     return stack_func(to_stack)
 
 

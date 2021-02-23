@@ -61,10 +61,10 @@ import numpy as np
 #
 
 
-fn = 20
-fp = 63
-tn = 357
-tp = 107
+fn = 8
+fp = 39
+tn = 430
+tp = 82
 
 
 sum_data = fp + fn + tp + tn

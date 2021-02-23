@@ -1,0 +1,7 @@
+abbey < 0.1
+access_road > 0.7
+air_base > 0.8
+airfield > 0.8
+access_road - abbey > 0.2
+access_road - air_base > 0.05
+access_road - airfield > 0.05

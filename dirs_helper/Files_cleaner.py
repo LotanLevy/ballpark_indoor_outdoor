@@ -1,8 +1,8 @@
 import os
 from shutil import copyfile
 
-ROOT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_2016_07_26\\images\\validation"
-DST_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_cleaned\\validation"
+ROOT_PATH = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets\\ADE20K_2016_07_26\\ADE20K_2016_07_26\\images\\validation"
+DST_PATH = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets\\ADE20K_cleaned\\validation"
 
 
 
