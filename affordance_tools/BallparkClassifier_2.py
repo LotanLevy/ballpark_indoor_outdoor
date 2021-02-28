@@ -243,7 +243,7 @@ class BallparkClassifier2:
                 else:
                     train_features = np.concatenate((train_features, bag_features))
                 all_paths += paths
-            assert train_features.shape[0] == all_labels.shape[0]
+        assert train_features.shape[0] == all_labels.shape[0]
 
         preds = np.sign(train_features @ w)
         tn, fp, fn, tp = confusion_matrix(all_labels, preds).ravel()

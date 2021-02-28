@@ -250,11 +250,7 @@ def get_args_parser():
     parser.add_argument('--best_num',  type=int, default=10)
     parser.add_argument('--best_type',  type=str, default="mean", choices=["mean", "max"])
     parser.add_argument('--nn_model', type=str, default="vgg16", choices=["vgg16, resnet"])
-
-
-
-
-
+    parser.add_argument('--features_level',  type=int, default=-2)
 
     parser.add_argument('--output_path', type=str, default=os.getcwd())
 
@@ -342,6 +338,8 @@ def get_prediction_func(model_type, ckpt_path):
     else:
         w = np.load(os.path.join(ckpt_path, "ballpark_weights.npy"))
         return lambda features: features.dot(w) if features.shape[0] == w.shape[0] else get_bag_features_with_bias(features).dot(w)
+
+
 
 def main():
     args = get_args_parser().parse_args()

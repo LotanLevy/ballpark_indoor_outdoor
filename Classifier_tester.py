@@ -6,8 +6,8 @@ import os
 import numpy as np
 import argparse
 from data_tools.dataloader import Dataloader
-from args_helper import get_features_model, get_preprocessing_func_by_name, parse_weights_paths, get_prediction_func, \
-    get_classification_by_values,prepare_svm_data
+from args_helper import get_features_model, get_preprocessing_func_by_name, parse_weights_paths, get_prediction_func\
+    ,prepare_svm_data
 from evaluation_tools.evaluate import *
 from sklearn.metrics import confusion_matrix
 
@@ -28,6 +28,8 @@ def get_args_parser():
                                                                          "the arguments should be separated by $")
     parser.add_argument('--positive_label',  type=int, default=1)
     parser.add_argument('--negative_label',  type=int, default=0)
+    parser.add_argument('--ballpark_threshold',  type=float, default=0.5)
+
     parser.add_argument('--output_path', type=str, default=os.getcwd())
     parser.add_argument('--nn_model', type=str, default="vgg16", choices=["vgg16", "resnet50"])
     parser.add_argument('--features_level',  type=int, default=-2)
@@ -45,7 +47,16 @@ def get_binary_labels_and_data(dataloader, positive_label, negative_label):
     return X, y, paths
 
 
-
+def get_classification_threshold(self, classify_mode, model_type, scores, labels):
+    if not classify_mode:
+        return get_roc_threshold(scores, labels)
+    elif model_type == "ballpark":
+        return (self.positive_val - self.negative_val) / 2.0
+    elif self.model_type == "svm":
+        return 0.0
+    else:
+        print("illegal model type")
+        return None
 
 
 def main():
@@ -60,19 +71,27 @@ def main():
     X, y, paths = get_binary_labels_and_data(dataloader, args.positive_label, args.negative_label)
 
     models_evaluations = dict()
-    evaluator = Evaluator()
+    evaluator = Evaluator(args.positive_label, args.negative_label, classify_mode=args.classify_mode)
     columns_names = evaluator.get_titles()
 
     for name in models:
         pred_func = models[name]
         scores = pred_func(X)
-        if args.classify_mode:
-            all_preds = get_classification_by_values(args.positive_label, args.negative_label, scores)
-        else:
-            all_preds = get_classifications_by_roc(scores, y)
-        models_evaluations[name] = evaluator.get_evaluation_titles(y, all_preds)
 
-    save_evaluations(columns_names, models_evaluations, args.output_path)
+        if not args.classify_mode:
+            threshold = get_roc_threshold(scores, y)
+        elif "ballpark" in name:
+            threshold = args.ballpark_threshold
+        elif "svm" in name:
+            threshold = 0.0
+        else:
+            print("illegal model type - {}".format(name))
+            threshold = None
+
+
+        models_evaluations[name] = evaluator.evaluate(scores, y, threshold)
+
+    save_evaluations(models_evaluations, args.output_path)
 
 
 

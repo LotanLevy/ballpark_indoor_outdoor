@@ -61,7 +61,7 @@ import numpy as np
 #
 
 
-fn = 8
+fn = 12
 fp = 39
 tn = 430
 tp = 82

@@ -28,7 +28,7 @@ def get_args_parser():
     parser.add_argument('--constraints_file', '-cf',  type=str, required=True)
     parser.add_argument('--train_root_path',  type=str, required=True)
     parser.add_argument('--val_root_path',  type=str, required=True)
-    parser.add_argument('--cls_method',  type=str, default="regress", choices=['test', 'class', 'regress', 'regwithentropy', 'clswithentropy'])
+    parser.add_argument('--cls_method',  type=str, default="regress", choices=['test', 'class', 'regress', 'regwithentropy', 'clswithentropy', 'class2'])
     parser.add_argument('--features_level',  type=int, default=-2)
 
     parser.add_argument('--input_size',  type=int, default=224)
@@ -62,6 +62,7 @@ def run_svm(constraints_parser, train_bags, polar_bound, output_path):
     elif len(positive_classes) == 0:
         print("There is no polar positive classes")
     X, y, paths = prepare_svm_data(train_bags, negative_classes, positive_classes)
+    print("svm with {} train on data with size {}".format(polar_bound, X.shape[0]))
     clf = svm.SVC(kernel='linear')
 
     clf.fit(X, y)
@@ -77,6 +78,8 @@ def run_svm(constraints_parser, train_bags, polar_bound, output_path):
 def get_ballpark_model(ballpark_type):
     if ballpark_type == "class":
         ballpark_object = BallparkClassifier
+    elif ballpark_type == "class2":
+        ballpark_object = BallparkClassifier2
     elif ballpark_type == "regress":
         ballpark_object = RegressionModel
     elif ballpark_type == "clswithentropy":
@@ -119,7 +122,7 @@ def main():
     train_bags = train_dataloader.split_into_bags(train=True)
     print("Run SVM model")
     if not args.no_svm:
-        svm_output_path = os.path.join(args.output_path, os.path.join("svm_model", "{}".format(args.polar_svm_param.replace(".", ""))))
+        svm_output_path = os.path.join(args.output_path, os.path.join("svm_model", "{}".format(str(args.polar_svm_param).replace(".", ""))))
         svm_w, svm_b = run_svm(constraints, train_bags, args.polar_svm_param, svm_output_path)
     if not args.no_ballpark:
         ballpark_output_path = os.path.join(args.output_path, "ballpark_model")

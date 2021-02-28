@@ -87,6 +87,24 @@ def compute_roc_EER(fpr, tpr):
     assert (len(roc_EER) == 1.0)
     return np.array(roc_EER)
 
+
+def get_roc_threshold(scores, labels):
+    fpr, tpr, thresholds = metrics.roc_curve(labels, scores)
+    # optimal_idx = np.argmax(tpr - fpr)
+    # optimal_threshold = thresholds[optimal_idx]
+    eer = brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+    thresh = interp1d(fpr, thresholds)(eer)
+    return thresh
+
+def get_auc_eer(scores, labels):
+    fpr, tpr, thresholds = metrics.roc_curve(labels, scores)
+
+    # AUC
+    auc = metrics.auc(fpr, tpr)
+    eer= brentq(lambda x: 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+    return auc, eer
+
+
 def get_classifications_by_roc(scores, labels):
     fpr, tpr, thresholds = metrics.roc_curve(labels, scores)
     # optimal_idx = np.argmax(tpr - fpr)
@@ -205,25 +223,64 @@ def create_images_graph(output_path, paths, scores, zoom=0.08, columns=20, max_o
     plt.savefig(os.path.join(output_path, "scores_visualization_indoor_outdoor.png"), dpi=500)
     plt.show()
 
+def get_classification_by_values(positive_val, negative_val, preds, threshold):
+    results = np.zeros(preds.shape)
+    results[np.where(preds < threshold)[0]] = negative_val
+    results[np.where(preds >= threshold)[0]] = positive_val
+    return results.astype(np.int)
+
 
 class Evaluator:
+    def __init__(self, positive_val, negative_val, classify_mode=True):
+        self.classify_mode = classify_mode
+        self.positive_val = positive_val
+        self.negative_val = negative_val
 
-    def get_titles(self):
-        return ['tn', 'fp', 'fn', 'tp', 'accuracy', 'precision', 'recall', 'f_score']
 
-    def get_evaluation_titles(self, true_labels, preds):
-        tn, fp, fn, tp = confusion_matrix(true_labels, preds).ravel()
+
+    def evaluate(self, scores, labels, threshold):
+        self.values = dict()
+        self.values["threshold"] = threshold
+        if not self.classify_mode:
+            auc, eer = get_auc_eer(scores, labels)
+            self.values["auc"] = auc
+            self.values["eer"] = eer
+
+        pred_labels = get_classification_by_values(self.positive_val, self.negative_val, scores, self.values["threshold"])
+        tn, fp, fn, tp = confusion_matrix(labels, pred_labels).ravel()
         sum_data = fp + fn + tp + tn
 
         accuracy = (tp + tn) / sum_data
         precision = tp / (tp + fp)
         recall = tp / (tp + fn)
         f_score = 2 * (precision * recall) / (precision + recall)
-        return {'tn': tn, 'fp': fp, 'fn': fn, 'tp': tp, 'accuracy':accuracy, 'precision':precision, 'recall':recall, 'f_score':f_score}
 
-def save_evaluations(titles, evaluations_for_models, output_path):
+        self.values["tn"], self.values["fp"], self.values["fn"], self.values["tp"] = tn, fp, fn, tp
+        self.values["accuracy"] = accuracy
+        self.values["precision"] = precision
+        self.values["recall"] = recall
+        self.values["f_score"] = f_score
+        return self.values
+
+
+    def get_titles(self):
+        titles = ['tn', 'fp', 'fn', 'tp', 'accuracy', 'precision', 'recall', 'f_score']
+        return ['tn', 'fp', 'fn', 'tp', 'accuracy', 'precision', 'recall', 'f_score']
+
+
+def save_evaluations(evaluations_for_models, output_path):
     with open(os.path.join(output_path, 'evaluations.csv'), 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["model_name"] + titles)
+        titles = set()
+
         for model_name in evaluations_for_models:
-            writer.writerow([model_name]+[evaluations_for_models[model_name][title] for title in titles])
+            titles = titles.union(evaluations_for_models[model_name].keys())
+
+        titles = list(titles)
+        writer.writerow(["model_name"] + titles)
+
+
+        for model_name in evaluations_for_models:
+            writer.writerow([model_name]+[evaluations_for_models[model_name][title]
+                                          if title in evaluations_for_models[model_name]
+                                          else None for title in titles])

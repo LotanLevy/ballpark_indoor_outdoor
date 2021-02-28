@@ -37,6 +37,7 @@ def get_prediction_func(weights_ckpt_path, bias_ckpt_path):
     else:
         b = w[0]
         w = w[1:]
+
     return lambda X: get_pred(w, b, X)
 
 
@@ -71,11 +72,11 @@ def parse_weights_paths(models_args):
             continue
     return weights
 
-def get_classification_by_values(positive_val, negative_val, preds):
-    results = np.around(preds)
-    results[np.where(preds < negative_val)[0]] = negative_val
-    results[np.where(preds > positive_val)[0]] = positive_val
-    return results.astype(np.int)
+# def get_classification_by_values(positive_val, negative_val, preds, threshold):
+#     results = np.zeros(preds.shape)
+#     results[np.where(preds < threshold)[0]] = negative_val
+#     results[np.where(preds >= threshold)[0]] = positive_val
+#     return results.astype(np.int)
 
 
 def build_data_by_classes(bags, classes):
