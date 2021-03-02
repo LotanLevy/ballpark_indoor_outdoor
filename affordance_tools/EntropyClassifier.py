@@ -16,9 +16,10 @@ import datetime
 
 
 class EntropyClassifier:
-    def __init__(self, constraints_parser, bags_dict):
+    def __init__(self, constraints_parser, bags_dict, labeled_bags):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict
+        self.labeled_bags = labeled_bags
 
         self.pairwise_bags = list(itertools.combinations(list(self.bags_dict.keys()),2))
 

@@ -8,9 +8,10 @@ import os
 
 
 class BallparkClassifier:
-    def __init__(self, constraints_parser, bags_dict):
+    def __init__(self, constraints_parser, bags_dict, labeled_bags):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict
+        self.labeled_bags = labeled_bags
 
         self.pairwise_bags = list(itertools.combinations(list(self.bags_dict.keys()),2))
 
@@ -28,6 +29,12 @@ class BallparkClassifier:
         print("constraints are legal - {}".format(self.legal_constraints))
         print("w size {}".format(self.features_num))
         print("y size {}".format(self.data_size))
+
+
+    def get_add_bias(self, features_vector):
+        bias_row = np.ones((features_vector.shape[0], 1))
+        features_with_bias = np.concatenate((bias_row, features_vector), axis=1)
+        return features_with_bias
 
 
     def get_data_size(self):
@@ -48,13 +55,13 @@ class BallparkClassifier:
         return legal_constraints
 
 
-    def _get_score_by_cls_name(self, cls_name, theta):
-        bag = self.bags_dict[cls_name]
-        bag_features, paths = bag.get_features()
-        if bag_features is None:
-            return None
-        scores = (1. / len(bag)) * bag_features * theta
-        return scores
+    # def _get_score_by_cls_name(self, cls_name, theta):
+    #     bag = self.bags_dict[cls_name]
+    #     bag_features, paths = bag.get_features()
+    #     if bag_features is None:
+    #         return None
+    #     scores = (1. / len(bag)) * bag_features * theta
+    #     return scores
 
 
     def solve_y(self, w, v=False):
@@ -70,7 +77,7 @@ class BallparkClassifier:
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
-            bag_features, paths = bag.get_features()
+            bag_features, paths =  self.get_add_bias(bag.get_features())
             loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
 
@@ -111,7 +118,7 @@ class BallparkClassifier:
         return y_t, prob.value
 
     def solve_w(self, yhat, reg_val=10 ** -1, v=False):
-        w = cp.Variable(self.features_num)  # +intercept
+        w = cp.Variable(self.features_num + 1)  # +intercept
         reg = cp.square(cp.norm(w, 2))
 
         loss = Constant(0)
@@ -120,7 +127,7 @@ class BallparkClassifier:
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
-            bag_features, paths = bag.get_features()
+            bag_features, paths =  self.get_add_bias(bag.get_features())
             loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
         prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg))
@@ -133,7 +140,7 @@ class BallparkClassifier:
         return w_t, prob.value
 
     def get_w0(self, reg_val=10 ** -1, v=False):
-        w = cp.Variable(self.features_num)  # +intercept
+        w = cp.Variable(self.features_num + 1)  # +intercept
         reg = cp.square(cp.norm(w, 2))
         P = []
         for pair, lower_bound in self.constraints_parser.cls2cls_diff_lower_bounds:
@@ -146,8 +153,8 @@ class BallparkClassifier:
         if len(P) > 0:
             for idx, pair in enumerate(P):
                 bag1, bag2 = self.bags_dict[pair[0]], self.bags_dict[pair[1]]
-                bag1_features, paths = bag1.get_features()
-                bag2_features, paths = bag2.get_features()
+                bag1_features, paths = self.get_add_bias(bag1.get_features())
+                bag2_features, paths =  self.get_add_bias(bag2.get_features())
 
                 features_sum1 = np.mean(bag1_features, axis=0)
                 assert(len(features_sum1) == 4096)
@@ -156,6 +163,18 @@ class BallparkClassifier:
                 assert(len(features_sum1) == 4096)
 
                 constraints.append((features_sum1 @ w) >= (features_sum2 @ w) - psi[idx])
+
+        # objective = (cp.sum(psi) / len(P)) + reg_val * reg
+        #
+        # # known labels
+        # if self.labeled_bags is not None:
+        #     positive_features, _ = self.labeled_bags["1"].get_features()
+        #     negative_features, _ = self.labeled_bags["0"].get_features()
+        #     labeled_psi = cp.Variable(positive_features.shape[0] + negative_features.shape[0])
+        #     constraints.append(cp.multiply(np.ones(positive_features.shape[0]), positive_features @ w) >= 1 - labeled_psi[:positive_features.shape[0]])
+        #     constraints.append(cp.multiply(-1 * np.ones(positive_features.shape[0]), negative_features @ w) >= 1 - labeled_psi[positive_features.shape[0]:])
+        #     constraints.append(labeled_psi >= 0)
+        #     objective += (cp.sum(psi) / len(positive_features.shape[0] + negative_features.shape[0]))
 
 
         prob = cp.Problem(cp.Minimize((cp.sum(psi) / len(P)) + reg_val * reg), constraints=constraints)

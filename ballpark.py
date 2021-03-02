@@ -30,6 +30,8 @@ def get_args_parser():
     parser.add_argument('--val_root_path',  type=str, required=True)
     parser.add_argument('--cls_method',  type=str, default="regress", choices=['test', 'class', 'regress', 'regwithentropy', 'clswithentropy', 'class2'])
     parser.add_argument('--features_level',  type=int, default=-2)
+    parser.add_argument('--labeled_data_path',  type=str, default=None)
+
 
     parser.add_argument('--input_size',  type=int, default=224)
     parser.add_argument('--split_val',  type=float, default=0.2)
@@ -52,7 +54,7 @@ def get_args_parser():
     return parser
 
 
-def run_svm(constraints_parser, train_bags, polar_bound, output_path):
+def run_svm(constraints_parser, train_bags, labeled_bags, polar_bound, output_path):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     # prepare data for svm
@@ -89,12 +91,12 @@ def get_ballpark_model(ballpark_type):
         return None
     return ballpark_object
 
-def run_ballpark_model(ballpark_type, constraints, train_bags, reg_val, reg_type, output_path):
+def run_ballpark_model(ballpark_type, constraints, train_bags, labeled_bags, reg_val, reg_type, output_path):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     print("Initialize ballpark model")
     ballpark_object = get_ballpark_model(ballpark_type)
-    ballpark_model = ballpark_object(constraints, train_bags)
+    ballpark_model = ballpark_object(constraints, train_bags, labeled_bags)
     print("Start ballpark learning")
     w_t, y_t, _ = ballpark_model.solve_w_y(reg_val=reg_val, weights_path=os.path.join(output_path, "ballpark_weights"), reg_type=reg_type, output_path=output_path)
     np.save(os.path.join(output_path, "ballpark_weights"), w_t)
@@ -118,15 +120,20 @@ def main():
     preprocessing_func = get_preprocessing_func_by_name(args.nn_model)
     nn_model = get_features_model(args.nn_model, args.input_size, features_level=args.features_level)
     train_dataloader = Dataloader(nn_model, args.train_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func)
-    print("Split data into bags")
     train_bags = train_dataloader.split_into_bags(train=True)
+    if args.labeled_data_path is not None:
+        labeled_dataloader = Dataloader(nn_model, args.labeled_data_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func)
+        labeled_bags = labeled_dataloader.split_into_bags(train=True)
+    else:
+        labeled_bags = None
+
     print("Run SVM model")
     if not args.no_svm:
         svm_output_path = os.path.join(args.output_path, os.path.join("svm_model", "{}".format(str(args.polar_svm_param).replace(".", ""))))
-        svm_w, svm_b = run_svm(constraints, train_bags, args.polar_svm_param, svm_output_path)
+        svm_w, svm_b = run_svm(constraints, train_bags, labeled_bags, args.polar_svm_param, svm_output_path)
     if not args.no_ballpark:
         ballpark_output_path = os.path.join(args.output_path, "ballpark_model")
-        ballpark_w = run_ballpark_model(args.cls_method, constraints, train_bags, args.reg_val, args.reg_type, ballpark_output_path)
+        ballpark_w = run_ballpark_model(args.cls_method, constraints, train_bags, labeled_bags, args.reg_val, args.reg_type, ballpark_output_path)
 
 
     # # writes ballpark constraints into file

@@ -15,9 +15,10 @@ import datetime
 
 
 class BallparkClassifier2:
-    def __init__(self, constraints_parser, bags_dict):
+    def __init__(self, constraints_parser, bags_dict, labeled_bags):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict
+        self.labeled_bags = labeled_bags
 
         self.pairwise_bags = list(itertools.combinations(list(self.bags_dict.keys()),2))
 
@@ -85,14 +86,6 @@ class BallparkClassifier2:
                 print(cls + " is empty")
             bag_features, paths = self.get_bag_features_with_bias(bag)
             loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
-            # print(bag_features @ w)
-            # preds = self.softmax(bag_features @ w)
-            # print(preds)
-            # if np.any(preds == 0):
-            #     print("preds == 0")
-            #
-            #
-            # loss += cp.sum(-cp.multiply(cp.pos(yhat[bag_indices]), cp.log(preds)))
 
             # upper and lower constraints
             if cls in self.constraints_parser.lower_bounds:
@@ -197,7 +190,12 @@ class BallparkClassifier2:
         else:
             print("_________________________________")
             print("P set is empty, w0=0")
-        prob = cp.Problem(cp.Minimize((cp.sum(psi) / len(P)) + reg_val * reg), constraints=constraints)
+
+        objective = (cp.sum(psi) / len(P)) + reg_val * reg
+
+
+
+        prob = cp.Problem(cp.Minimize(objective), constraints=constraints)
 
         try:
             prob.solve(verbose=True)
