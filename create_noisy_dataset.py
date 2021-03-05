@@ -8,9 +8,9 @@ import random
 # dst_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\noisy_io\\noisy_train"
 # src_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\io\\train"
 SUFFIXES = [".jpg"]
-noisy_images_src = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\train"
+noisy_images_src = "/datasets/ballpark_datasets/dine/train"
 dst_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\noisy_dine\\noisy_train"
-src_cls_path = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\dine\\train"
+src_cls_path = "/datasets/ballpark_datasets/dine/train"
 
 DIRS_LEVELS = 2
 

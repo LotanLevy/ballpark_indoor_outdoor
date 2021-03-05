@@ -2,7 +2,7 @@ import os
 import numpy as np
 labels_map = {"1": 1, "0": 0}
 from affordance_tools.ContraintsParser import ConstraintsParser
-
+import argparse
 
 root = "C:\\Users\\lotan\\Documents\\studies\\\Affordances\\datasets\\ballpark_datasets\\desert\\train"
 dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_indoor_outdoor\\explore_constraints\\desert_true_constraints_eps_01.txt"
@@ -61,11 +61,11 @@ def write_bounds(parts, dest):
             f.write("{} < {} < {}\n".format(format(bounds[0], '.2f'), cls, format(bounds[1], '.2f')))
 
 # creates constraints from splitted dir
-true_indoor_percent = get_indoor_size(root, labels_map)
-bounds = create_lower_and_upper_bounds(true_indoor_percent, EPS)
-diff_bounds = create_mutual_bounds(true_indoor_percent, EPS)
-all_bounds = {**bounds, **diff_bounds}
-write_bounds(all_bounds, dest)
+# true_indoor_percent = get_indoor_size(root, labels_map)
+# bounds = create_lower_and_upper_bounds(true_indoor_percent, EPS)
+# diff_bounds = create_mutual_bounds(true_indoor_percent, EPS)
+# all_bounds = {**bounds, **diff_bounds}
+# write_bounds(all_bounds, dest)
 
 # creates from constraints file
 def build_diff_constraints_from_lower_and_upper(constraints_parser):
@@ -107,8 +107,39 @@ def write_bounds_into_file(all_bounds_dict, dest_full_path):
                 f.write("\n{} < {}".format(name, format(bounds[1], '.2f')))
 
 
+def get_args_parser():
+    parser = argparse.ArgumentParser(description='Process constraint collector args.')
+    parser.add_argument('--src_path', '-s', type=str, required=True)
+    parser.add_argument('--dest_path',  '-d', type=str, required=True)
+    parser.add_argument('--expand_constraints',  '-expand', action="store_true")
+    parser.add_argument('--create_auto_constraints', '-auto', action="store_true")
+    parser.add_argument('--auto_eps', '-e', type=float, default=0.1)
+    parser.add_argument('--neg_label', type=str, default="0")
+    parser.add_argument('--pos_label', type=str, default="1")
+    return parser
+
+def main():
+    args = get_args_parser().parse_args()
+    print(vars(args))
+    if args.expand_constraints:
+        if not os.path.exists(args.dest_path):
+            os.makedirs(args.dest_path)
+        dest_file = os.path.join(args.dest_path, "{}_full.txt".format(os.path.abspath(args.src_path).split(".")[0]))
+        all_bounds = get_all_bounds(args.src_path)
+        write_bounds_into_file(all_bounds, dest_file)
+    else:
+        # creates constraints from split dir
+        labels_map = {args.pos_label: 1, args.neg_label: 0}
+        true_indoor_percent = get_indoor_size(args.src_path, labels_map)
+        bounds = create_lower_and_upper_bounds(true_indoor_percent, args.auto_eps)
+        diff_bounds = create_mutual_bounds(true_indoor_percent, args.auto_eps)
+        all_bounds = {**bounds, **diff_bounds}
+        write_bounds(all_bounds, args.dest_path)
 
 
+
+if __name__ == "__main__":
+    main()
 # PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\explore_constraints\\teaching_constraints.txt"
 # DEST = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\projects\\ballpark_indoor_outdoor\\explore_constraints\\teaching_constraints_full.txt"
 # all_bounds = get_all_bounds(PATH)

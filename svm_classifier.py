@@ -10,6 +10,8 @@ from evaluation_tools.evaluate import *
 from sklearn.metrics import confusion_matrix
 from sklearn import svm
 from shutil import copyfile
+from args_helper import get_features_model, get_preprocessing_func_by_name, prepare_svm_data
+
 
 
 
@@ -27,9 +29,8 @@ def get_args_parser():
     parser.add_argument('--max_files',  type=int, default=None)
     parser.add_argument('--max_experiments',  type=int, default=1)
     parser.add_argument('--noise',  type=int, default=None)
-
-
-
+    parser.add_argument('--nn_model', type=str, default="vgg16", choices=["vgg16", "resnet50"])
+    parser.add_argument('--features_level',  type=int, default=-2)
 
 
     parser.add_argument('--labels_map_path',  type=str, default=None)
@@ -68,8 +69,10 @@ def main():
     print("Reads constraints file")
     preprocessing_func = lambda input_data: vgg16.preprocess_input(np.copy(input_data.astype('float32')))
     print("Initialize dataloader")
-    train_dataloader = Dataloader(args.train_root_path, 1, args.input_size, 0, preprocess_func=preprocessing_func)
-    val_dataloader = Dataloader(args.val_root_path, 1, args.input_size, 0, preprocess_func=preprocessing_func,
+    nn_model = get_features_model(args.nn_model, args.input_size, features_level=args.features_level)
+
+    train_dataloader = Dataloader(nn_model, args.train_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func)
+    val_dataloader = Dataloader(nn_model, args.val_root_path, 1, args.input_size, 0, features_level=args.features_level, preprocess_func=preprocessing_func,
                                 labels_map_path=args.labels_map_path)
 
     print("Split data into bags")
@@ -80,7 +83,7 @@ def main():
 
     for i in range(args.max_experiments):
 
-        exp_output_path = os.path.join(args.output_path, str(i))
+        exp_output_path = os.path.join(args.output_path, "svm_model_{}".format(i))
         if not os.path.exists(exp_output_path):
             os.makedirs(exp_output_path)
 
@@ -122,66 +125,66 @@ def main():
 
 
 
-        if args.test_type == "valid":
-            positive_features, positive_paths = val_bags["1"].get_features()
-            negative_features, negative_paths = val_bags["0"].get_features()
-            X = np.concatenate((positive_features, negative_features))
-            y_positive = np.ones(positive_features.shape[0])
-            y_negative = NEGATIVE_VAL * np.ones(negative_features.shape[0])
-            all_labels = np.concatenate((y_positive, y_negative))
-
-            all_preds = svm_prediction(w, b, X)
-            all_paths = positive_paths + negative_paths
-
-            binary_labels = (all_labels == 1).astype(np.int)
-            binary_preds = (all_preds == 1).astype(np.int)
-
-
-            eer, auc = display_roc_graph(exp_output_path, "indoor_outdoor", all_preds, all_labels)
-            pred_classifications = get_classifications_by_roc(all_preds, all_labels)
-            tn, fp, fn, tp = confusion_matrix(binary_labels, pred_classifications).ravel()
-            display_paths_according_to_the_confusion_matrix(exp_output_path, all_paths, pred_classifications, binary_labels)
-            sum_data = fp + fn + tp + tn
-
-            accuracy = (tp + tn) / sum_data
-
-            precision = tp / (tp + fp)
-            recall = tp / (tp + fn)
-            f_score = 2 * (precision * recall) / (precision + recall)
-            print(eer, auc, f_score)
-            results_dict["eer"] += eer/args.max_experiments
-            results_dict["auc"] += auc/args.max_experiments
-            results_dict["f_score"] += f_score/args.max_experiments
-
-
-
-            indices = np.random.choice(len(all_paths), 40, replace=False)
-            paths_to_display = [all_paths[i] for i in indices]
-            create_images_graph(exp_output_path, paths_to_display, all_preds[indices])
-
-        # for exploration
-        if args.test_type == 'explore':
-            all_preds = np.array([])
-            all_paths = []
-            for bag_name, bag in val_bags.items():
-                bag_features, bag_paths = bag.get_features()
-
-                bag_preds = svm_prediction(w, b, bag_features)
-                all_preds = np.concatenate((all_preds, bag_preds))
-                all_paths += bag_paths
-
-
-            images_path = os.path.join(exp_output_path, "scored_test")
-            os.makedirs(images_path, exist_ok=True)
-            for path, pred in list(zip(all_paths, all_preds)):
-                file_name = os.path.basename(path)
-                copyfile(path, os.path.join(images_path, "{}_{}".format(format(pred, '.2f').replace(".", "_"),file_name)))
-
-    print(results_dict)
-
-
-    with open(os.path.join(args.output_path, "avg_results.txt"), "w") as f:
-        f.write(str(results_dict))
+    #     if args.test_type == "valid":
+    #         positive_features, positive_paths = val_bags["1"].get_features()
+    #         negative_features, negative_paths = val_bags["0"].get_features()
+    #         X = np.concatenate((positive_features, negative_features))
+    #         y_positive = np.ones(positive_features.shape[0])
+    #         y_negative = NEGATIVE_VAL * np.ones(negative_features.shape[0])
+    #         all_labels = np.concatenate((y_positive, y_negative))
+    #
+    #         all_preds = svm_prediction(w, b, X)
+    #         all_paths = positive_paths + negative_paths
+    #
+    #         binary_labels = (all_labels == 1).astype(np.int)
+    #         binary_preds = (all_preds == 1).astype(np.int)
+    #
+    #
+    #         eer, auc = display_roc_graph(exp_output_path, "indoor_outdoor", all_preds, all_labels)
+    #         pred_classifications = get_classifications_by_roc(all_preds, all_labels)
+    #         tn, fp, fn, tp = confusion_matrix(binary_labels, pred_classifications).ravel()
+    #         display_paths_according_to_the_confusion_matrix(exp_output_path, all_paths, pred_classifications, binary_labels)
+    #         sum_data = fp + fn + tp + tn
+    #
+    #         accuracy = (tp + tn) / sum_data
+    #
+    #         precision = tp / (tp + fp)
+    #         recall = tp / (tp + fn)
+    #         f_score = 2 * (precision * recall) / (precision + recall)
+    #         print(eer, auc, f_score)
+    #         results_dict["eer"] += eer/args.max_experiments
+    #         results_dict["auc"] += auc/args.max_experiments
+    #         results_dict["f_score"] += f_score/args.max_experiments
+    #
+    #
+    #
+    #         indices = np.random.choice(len(all_paths), 40, replace=False)
+    #         paths_to_display = [all_paths[i] for i in indices]
+    #         create_images_graph(exp_output_path, paths_to_display, all_preds[indices])
+    #
+    #     # for exploration
+    #     if args.test_type == 'explore':
+    #         all_preds = np.array([])
+    #         all_paths = []
+    #         for bag_name, bag in val_bags.items():
+    #             bag_features, bag_paths = bag.get_features()
+    #
+    #             bag_preds = svm_prediction(w, b, bag_features)
+    #             all_preds = np.concatenate((all_preds, bag_preds))
+    #             all_paths += bag_paths
+    #
+    #
+    #         images_path = os.path.join(exp_output_path, "scored_test")
+    #         os.makedirs(images_path, exist_ok=True)
+    #         for path, pred in list(zip(all_paths, all_preds)):
+    #             file_name = os.path.basename(path)
+    #             copyfile(path, os.path.join(images_path, "{}_{}".format(format(pred, '.2f').replace(".", "_"),file_name)))
+    #
+    # print(results_dict)
+    #
+    #
+    # with open(os.path.join(args.output_path, "avg_results.txt"), "w") as f:
+    #     f.write(str(results_dict))
 
 
 

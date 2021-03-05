@@ -45,55 +45,58 @@ class RegressionModel:
         return legal_constraints
 
 
+    def add_bias(self, features_vector):
+        bias_row = np.ones((features_vector.shape[0], 1))
+        features_with_bias = np.concatenate((bias_row, features_vector), axis=1)
+        return features_with_bias
 
-
-    def _get_score_by_cls_name(self, cls_name, theta):
-        bag = self.bags_dict[cls_name]
-        bag_features, paths = bag.get_features()
-        if bag_features is None:
-            return None
-        scores = (1. / len(bag)) * bag_features * theta
-        return scores
-
-    def feasibility_regression(self):
-        if not self.legal_constraints:
-            return None
-        theta = cp.Variable(self.features_num)
-        reg = cp.square(cp.norm(theta, NORM))
-
-        constraints = []
-        for pair, lower_bound in self.constraints_parser.cls2cls_diff_lower_bounds:
-            scores_high = self._get_score_by_cls_name(pair[0], theta)
-            scores_low = self._get_score_by_cls_name(pair[1], theta)
-            constraints.append(cp.sum(scores_high) - cp.sum(scores_low) > lower_bound)
-
-        for pair, upper_bound in self.constraints_parser.cls2cls_diff_upper_bounds:
-            scores_high = self._get_score_by_cls_name(pair[0], theta)
-            scores_low = self._get_score_by_cls_name(pair[1], theta)
-            constraints.append(cp.sum(scores_high) - cp.sum(scores_low) < upper_bound)
-
-        for cls in self.bags_dict:
-            scores = self._get_score_by_cls_name(cls, theta)
-            if cls in self.constraints_parser.lower_bounds:
-                lower_bound = self.constraints_parser.lower_bounds[cls]
-                constraints.append(cp.sum(scores) <= lower_bound)
-            if cls in self.constraints_parser.upper_bounds:
-                upper_bound = self.constraints_parser.upper_bounds[cls]
-                constraints.append(cp.sum(scores) <= upper_bound)
-
-        prob = cp.Problem(cp.Minimize(1 * reg), constraints=constraints)
-
-        try:
-            prob.solve(verbose=False)
-        except:
-            prob.solve(solver="SCS")
-        w_t = np.squeeze(np.asarray(np.copy(theta.value)))
-        return w_t
+    # def _get_score_by_cls_name(self, cls_name, theta):
+    #     bag = self.bags_dict[cls_name]
+    #     bag_features, paths = bag.get_features()
+    #     if bag_features is None:
+    #         return None
+    #     scores = (1. / len(bag)) * bag_features * theta
+    #     return scores
+    #
+    # def feasibility_regression(self):
+    #     if not self.legal_constraints:
+    #         return None
+    #     theta = cp.Variable(self.features_num)
+    #     reg = cp.square(cp.norm(theta, NORM))
+    #
+    #     constraints = []
+    #     for pair, lower_bound in self.constraints_parser.cls2cls_diff_lower_bounds:
+    #         scores_high = self._get_score_by_cls_name(pair[0], theta)
+    #         scores_low = self._get_score_by_cls_name(pair[1], theta)
+    #         constraints.append(cp.sum(scores_high) - cp.sum(scores_low) > lower_bound)
+    #
+    #     for pair, upper_bound in self.constraints_parser.cls2cls_diff_upper_bounds:
+    #         scores_high = self._get_score_by_cls_name(pair[0], theta)
+    #         scores_low = self._get_score_by_cls_name(pair[1], theta)
+    #         constraints.append(cp.sum(scores_high) - cp.sum(scores_low) < upper_bound)
+    #
+    #     for cls in self.bags_dict:
+    #         scores = self._get_score_by_cls_name(cls, theta)
+    #         if cls in self.constraints_parser.lower_bounds:
+    #             lower_bound = self.constraints_parser.lower_bounds[cls]
+    #             constraints.append(cp.sum(scores) <= lower_bound)
+    #         if cls in self.constraints_parser.upper_bounds:
+    #             upper_bound = self.constraints_parser.upper_bounds[cls]
+    #             constraints.append(cp.sum(scores) <= upper_bound)
+    #
+    #     prob = cp.Problem(cp.Minimize(1 * reg), constraints=constraints)
+    #
+    #     try:
+    #         prob.solve(verbose=False)
+    #     except:
+    #         prob.solve(solver="SCS")
+    #     w_t = np.squeeze(np.asarray(np.copy(theta.value)))
+    #     return w_t
 
     def solve_w_y(self, reg_val=10**-1, v=False, weights_path=None, reg_type="l2", output_path=None):
         if not self.legal_constraints:
             return None,None,None
-        w = cp.Variable(self.features_num)  # +intercept
+        w = cp.Variable(self.features_num + 1)  # +intercept
         # reg = cp.square(cp.norm(w, NORM))
         yhat = cp.Variable(self.data_size)  # +intercept
 
@@ -119,7 +122,9 @@ class RegressionModel:
                 print(cls + " is empty")
             if cls not in self.constraints_parser.all_classes:
                 continue
-            bag_features, paths = bag.get_features()
+            bag_features = self.add_bias(bag.get_features()[0])
+
+            print(bag_features.shape[1])
 
             # loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
             loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
@@ -151,7 +156,26 @@ class RegressionModel:
             constraints.append((1. / (len(high_bag))) * cp.sum(yhat[high_bag_idx_range]) -
                                (1. / (len(low_bag))) * cp.sum(yhat[low_bag_idx_range]) <= upper_bound)
 
-        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg), constraints=constraints)
+        objective = loss/self.data_size + reg_val*reg
+
+
+        if self.labeled_bags is not None:
+            positive_features = self.add_bias(self.labeled_bags["1"].get_features()[0])
+            negative_features = self.add_bias(self.labeled_bags["0"].get_features()[0])
+            print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
+
+            labeled_loss = Constant(0)
+
+            pos_y = np.ones(positive_features.shape[0])
+            neg_y = np.zeros(negative_features.shape[0])
+
+            labeled_loss += cp.sum_squares((positive_features * w) - pos_y)
+            labeled_loss += cp.sum_squares((negative_features * w) - neg_y)
+
+            objective += 0.1 * (labeled_loss / (positive_features.shape[0] + negative_features.shape[0]))
+
+
+        prob = cp.Problem(cp.Minimize(objective), constraints=constraints)
 
         try:
             prob.solve(verbose=v)

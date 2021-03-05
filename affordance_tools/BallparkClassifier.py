@@ -31,7 +31,7 @@ class BallparkClassifier:
         print("y size {}".format(self.data_size))
 
 
-    def get_add_bias(self, features_vector):
+    def add_bias(self, features_vector):
         bias_row = np.ones((features_vector.shape[0], 1))
         features_with_bias = np.concatenate((bias_row, features_vector), axis=1)
         return features_with_bias
@@ -77,7 +77,8 @@ class BallparkClassifier:
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
-            bag_features, paths =  self.get_add_bias(bag.get_features())
+            bag_features, paths = bag.get_features()
+            bag_features = self.add_bias(bag_features)
             loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
 
@@ -127,10 +128,24 @@ class BallparkClassifier:
             bag = self.bags_dict[cls]
             if len(bag) == 0:
                 print(cls + " is empty")
-            bag_features, paths =  self.get_add_bias(bag.get_features())
+            bag_features, paths = bag.get_features()
+            bag_features = self.add_bias(bag_features)
             loss += cp.sum(cp.pos(1 - cp.multiply(yhat[bag_indices], bag_features @ w)))
 
-        prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg))
+        constraints = []
+        objective = loss/self.data_size + reg_val*reg
+        if self.labeled_bags is not None:
+            positive_features = self.add_bias(self.labeled_bags["1"].get_features()[0])
+            negative_features = self.add_bias(self.labeled_bags["0"].get_features()[0])
+            print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
+            labeled_psi = cp.Variable(positive_features.shape[0] + negative_features.shape[0])
+            constraints.append(cp.multiply(np.ones(positive_features.shape[0]), positive_features @ w) >= 1 - labeled_psi[:positive_features.shape[0]])
+            constraints.append(cp.multiply(-1 * np.ones(positive_features.shape[0]), negative_features @ w) >= 1 - labeled_psi[positive_features.shape[0]:])
+            constraints.append(labeled_psi >= 0)
+            objective += (cp.sum(labeled_psi) / (positive_features.shape[0] + negative_features.shape[0]))
+
+
+        prob = cp.Problem(cp.Minimize(objective), constraints)
 
         try:
             prob.solve(verbose=v)
@@ -152,32 +167,35 @@ class BallparkClassifier:
         constraints = []
         if len(P) > 0:
             for idx, pair in enumerate(P):
+                print(pair[0])
+                print(self.bags_dict.keys())
                 bag1, bag2 = self.bags_dict[pair[0]], self.bags_dict[pair[1]]
-                bag1_features, paths = self.get_add_bias(bag1.get_features())
-                bag2_features, paths =  self.get_add_bias(bag2.get_features())
+                bag1_features = self.add_bias(bag1.get_features()[0])
+                bag2_features = self.add_bias(bag2.get_features()[0])
 
                 features_sum1 = np.mean(bag1_features, axis=0)
-                assert(len(features_sum1) == 4096)
+                # assert(len(features_sum1) == 4096)
 
                 features_sum2 = np.mean(bag2_features, axis=0)
-                assert(len(features_sum1) == 4096)
+                # assert(len(features_sum1) == 4096)
 
                 constraints.append((features_sum1 @ w) >= (features_sum2 @ w) - psi[idx])
 
-        # objective = (cp.sum(psi) / len(P)) + reg_val * reg
-        #
-        # # known labels
-        # if self.labeled_bags is not None:
-        #     positive_features, _ = self.labeled_bags["1"].get_features()
-        #     negative_features, _ = self.labeled_bags["0"].get_features()
-        #     labeled_psi = cp.Variable(positive_features.shape[0] + negative_features.shape[0])
-        #     constraints.append(cp.multiply(np.ones(positive_features.shape[0]), positive_features @ w) >= 1 - labeled_psi[:positive_features.shape[0]])
-        #     constraints.append(cp.multiply(-1 * np.ones(positive_features.shape[0]), negative_features @ w) >= 1 - labeled_psi[positive_features.shape[0]:])
-        #     constraints.append(labeled_psi >= 0)
-        #     objective += (cp.sum(psi) / len(positive_features.shape[0] + negative_features.shape[0]))
+        objective = (cp.sum(psi) / len(P)) + reg_val * reg
+
+        # known labels
+        if self.labeled_bags is not None:
+            positive_features = self.add_bias(self.labeled_bags["1"].get_features()[0])
+            negative_features = self.add_bias(self.labeled_bags["0"].get_features()[0])
+            print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
+            labeled_psi = cp.Variable(positive_features.shape[0] + negative_features.shape[0])
+            constraints.append(cp.multiply(np.ones(positive_features.shape[0]), positive_features @ w) >= 1 - labeled_psi[:positive_features.shape[0]])
+            constraints.append(cp.multiply(-1 * np.ones(positive_features.shape[0]), negative_features @ w) >= 1 - labeled_psi[positive_features.shape[0]:])
+            constraints.append(labeled_psi >= 0)
+            objective += (cp.sum(labeled_psi) / (positive_features.shape[0] + negative_features.shape[0]))
 
 
-        prob = cp.Problem(cp.Minimize((cp.sum(psi) / len(P)) + reg_val * reg), constraints=constraints)
+        prob = cp.Problem(cp.Minimize(objective), constraints=constraints)
 
         try:
             prob.solve(verbose=v)

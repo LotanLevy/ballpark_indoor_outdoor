@@ -59,12 +59,22 @@ def run_svm(constraints_parser, train_bags, labeled_bags, polar_bound, output_pa
         os.makedirs(output_path)
     # prepare data for svm
     negative_classes, positive_classes = constraints_parser.get_negative_and_positive_classes_by_bound(polar_bound)
+    with open(os.path.join(output_path, "svm_classes.txt"), 'w') as f:
+        f.write("positive_classes_{}\nnegative_classes_{}".format(str(positive_classes), str(negative_classes)))
+
     if len(negative_classes) == 0:
         print("There is no polar negative classes")
     elif len(positive_classes) == 0:
         print("There is no polar positive classes")
+
     X, y, paths = prepare_svm_data(train_bags, negative_classes, positive_classes)
+    if labeled_bags is not None:
+        X_l, y_l, paths_l = prepare_svm_data(labeled_bags, ["0"], ["1"])
+        X = np.concatenate((X, X_l))
+        y= np.concatenate((y, y_l))
+
     print("svm with {} train on data with size {}".format(polar_bound, X.shape[0]))
+
     clf = svm.SVC(kernel='linear')
 
     clf.fit(X, y)
