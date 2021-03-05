@@ -24,6 +24,8 @@ def build_image(images_paths, titles, cols, image_size):
     rows = []
     for i in range(last_idx, 0, -cols):
         start = max(0, i - cols)
+        print(range(start, i+1))
+
 
         row_paths = [images_paths[i] for i in range(start, i+1)]
         row_titles = [titles[i] for i in range(start, i+1)]
@@ -76,8 +78,11 @@ def create_row_image(paths, images_size, titles = None, cols_num=None):
             d.text((0, 0), titles[i], fill=(0, 0, 0), font=font)
             image = np.vstack([image, text])
         images.append(image/ 255)
+    print(cols_num, len(images), range(cols_num - len(images)))
+
     if cols_num is not None and len(images) < cols_num:
         images += [np.ones(images[0].shape) for _ in range(cols_num - len(images))]
+    print(cols_num, len(images))
     return stack_with_spaces(images, vertical=False)
 
 
