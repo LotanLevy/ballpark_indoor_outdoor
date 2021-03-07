@@ -106,14 +106,7 @@ class RegressionModel:
         constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
 
-        if reg_type == "l2":
-            reg = cp.square(cp.norm(w, NORM))
-        elif reg_type == "entropy":
-            reg = -cp.sum(cp.entr(w))
-        else:
-            print("wrong reg")
-            return None, None, None
-        print(reg_type, reg)
+        reg = cp.square(cp.norm(w, NORM))
 
 
         for cls, bag_indices in self.bag2indices_range.items():
@@ -123,9 +116,6 @@ class RegressionModel:
             if cls not in self.constraints_parser.all_classes:
                 continue
             bag_features = self.add_bias(bag.get_features()[0])
-
-            print(bag_features.shape[1])
-
             # loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
             loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
 

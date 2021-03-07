@@ -23,10 +23,7 @@ def build_image(images_paths, titles, cols, image_size):
     last_idx = len(images_paths)-1
     rows = []
     for i in range(last_idx, 0, -cols):
-        start = max(0, i - cols)
-        print(range(start, i+1))
-
-
+        start = max(0, i - cols + 1)
         row_paths = [images_paths[i] for i in range(start, i+1)]
         row_titles = [titles[i] for i in range(start, i+1)]
         rows.append(create_row_image(row_paths, image_size, titles=row_titles, cols_num=cols))
@@ -56,7 +53,8 @@ def display_images_of_image(image, image_size, cols_num, title, output_path):
     plt.imshow(image)
     ticks_vals = np.arange(0, (cols_num) * image_size, step=image_size)
     plt.yticks(ticks_vals, fontsize=8, rotation=90)
-    plt.ylabel("Position in the ranking")
+    plt.ylabel("higher is better")
+    plt.xlabel("right is better")
     plt.tight_layout()
     plt.margins(0, 0)
     plt.rc('font', size=8)
@@ -78,11 +76,8 @@ def create_row_image(paths, images_size, titles = None, cols_num=None):
             d.text((0, 0), titles[i], fill=(0, 0, 0), font=font)
             image = np.vstack([image, text])
         images.append(image/ 255)
-    print(cols_num, len(images), range(cols_num - len(images)))
-
     if cols_num is not None and len(images) < cols_num:
         images += [np.ones(images[0].shape) for _ in range(cols_num - len(images))]
-    print(cols_num, len(images))
     return stack_with_spaces(images, vertical=False)
 
 

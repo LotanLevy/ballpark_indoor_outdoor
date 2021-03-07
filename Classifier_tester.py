@@ -9,6 +9,8 @@ from data_tools.dataloader import Dataloader
 from args_helper import get_features_model, get_preprocessing_func_by_name, parse_weights_paths, get_prediction_func\
     ,prepare_svm_data
 from evaluation_tools.evaluate import *
+from affordance_tools.ContraintsParser import ConstraintsParser
+
 from sklearn.metrics import confusion_matrix
 
 
@@ -33,6 +35,9 @@ def get_args_parser():
     parser.add_argument('--output_path', type=str, default=os.getcwd())
     parser.add_argument('--nn_model', type=str, default="vgg16", choices=["vgg16", "resnet50"])
     parser.add_argument('--features_level',  type=int, default=-2)
+    parser.add_argument('--clear_test',  action="store_true")
+    parser.add_argument('--constraints_file',  type=str, default=None)
+
 
     return parser
 
@@ -58,6 +63,22 @@ def get_classification_threshold(self, classify_mode, model_type, scores, labels
         print("illegal model type")
         return None
 
+def clear_data_by_constraints_bags(constraints_file, X, y, paths):
+    print("clean test paths")
+    constraints_parser = ConstraintsParser(constraints_file)
+    constrainted_classes = constraints_parser.all_classes
+    legal_indices = []
+    for i,path in enumerate(paths):
+        paths_cls = os.path.basename(path).split("__")[0]
+        if paths_cls not in constrainted_classes:
+            legal_indices.append(i)
+        else:
+            print(path +" removed")
+    clean_paths = [paths[j] for j in legal_indices]
+    return X[np.array(legal_indices)], y[np.array(legal_indices)], clean_paths
+
+
+
 
 def main():
     args = get_args_parser().parse_args()
@@ -69,6 +90,8 @@ def main():
 
     dataloader = Dataloader(nn_model, args.test_data_path, 1, args.input_size, 0, preprocess_func=preprocessing_func)
     X, y, paths = get_binary_labels_and_data(dataloader, args.positive_label, args.negative_label)
+    if args.clear_test and args.constraints_file is not None:
+        X, y, paths = clear_data_by_constraints_bags(args.constraints_file, X, y, paths)
 
     models_evaluations = dict()
     evaluator = Evaluator(args.positive_label, args.negative_label, classify_mode=args.classify_mode)

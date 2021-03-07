@@ -67,12 +67,25 @@ class EntropyClassifier:
 
 
 
-    # def softmax(self, x):
-    #     # first shift the values of f so that the highest number is 0:
-    #     x -= np.max(x)  # f becomes [-666, -333, 0]
-    #     p = np.exp(x) / np.sum(np.exp(x), axis=1)  # safe to do, gives the correct answer
-    #     return p
-
+    # def labeled_data(self, objective, constraints):
+    #     if self.labeled_bags is not None:
+    #         positive_features, _ = self.get_bag_features_with_bias(self.labeled_bags["1"])
+    #         negative_features, _ = self.get_bag_features_with_bias(self.labeled_bags["0"])
+    #         print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
+    #         labeled_psi = cp.Variable(positive_features.shape[0] + negative_features.shape[0])
+    #         pos_preds = positive_features @ w
+    #         neg_preds = negative_features @ w
+    #
+    #         pos_y = np.ones(positive_features.shape[0])
+    #         neg_y = np.zeros(negative_features.shape[0])
+    #
+    #         pos_entropy = -cp.multiply(pos_y, cp.log(pos_preds)) - cp.multiply(1 - pos_y, cp.log(1 - pos_preds))
+    #         neg_entropy = -cp.multiply(neg_y, cp.log(neg_preds)) - cp.multiply(1 - neg_y, cp.log(1 - neg_preds))
+    #
+    #         constraints.append(pos_entropy >= 1 - labeled_psi[:positive_features.shape[0]])
+    #         constraints.append(neg_entropy >= 1 - labeled_psi[positive_features.shape[0]:])
+    #         constraints.append(labeled_psi >= 0)
+    #         objective += (cp.sum(labeled_psi) / (positive_features.shape[0] + negative_features.shape[0]))
 
     def solve_y(self, W, v=False):
 
@@ -161,25 +174,6 @@ class EntropyClassifier:
 
         objective = loss/self.data_size + reg_val*reg
 
-        if self.labeled_bags is not None:
-            positive_features, _ = self.get_bag_features_with_bias(self.labeled_bags["1"])
-            negative_features, _ = self.get_bag_features_with_bias(self.labeled_bags["0"])
-            print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
-            labeled_psi = cp.Variable(positive_features.shape[0] + negative_features.shape[0])
-            pos_preds = positive_features @ w
-            neg_preds = negative_features @ w
-
-            pos_y = np.ones(positive_features.shape[0])
-            neg_y = np.zeros(negative_features.shape[0])
-
-            pos_entropy = -cp.multiply(pos_y, cp.log(pos_preds)) - cp.multiply(1 - pos_y, cp.log(1 - pos_preds))
-            neg_entropy = -cp.multiply(neg_y, cp.log(neg_preds)) - cp.multiply(1 - neg_y, cp.log(1 - neg_preds))
-
-
-            constraints.append(pos_entropy >= 1 - labeled_psi[:positive_features.shape[0]])
-            constraints.append(neg_entropy >= 1 - labeled_psi[positive_features.shape[0]:])
-            constraints.append(labeled_psi >= 0)
-            objective += (cp.sum(labeled_psi) / (positive_features.shape[0] + negative_features.shape[0]))
 
 
         prob = cp.Problem(cp.Minimize(objective), constraints=constraints)
@@ -233,27 +227,6 @@ class EntropyClassifier:
             constraints.append((bag_features @ w) <= 1)
 
         objective = (cp.sum(psi) / len(P)) + reg_val * reg
-
-        if self.labeled_bags is not None:
-            positive_features, _ = self.get_bag_features_with_bias(self.labeled_bags["1"])
-            negative_features, _ = self.get_bag_features_with_bias(self.labeled_bags["0"])
-            print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
-            labeled_psi = cp.Variable(positive_features.shape[0] + negative_features.shape[0])
-            pos_preds = positive_features @ w
-            neg_preds = negative_features @ w
-
-            pos_y = np.ones(positive_features.shape[0])
-            neg_y = np.zeros(negative_features.shape[0])
-
-            pos_entropy = -cp.multiply(pos_y, cp.log(pos_preds)) - cp.multiply(1 - pos_y, cp.log(1 - pos_preds))
-            neg_entropy = -cp.multiply(neg_y, cp.log(neg_preds)) - cp.multiply(1 - neg_y, cp.log(1 - neg_preds))
-
-            constraints.append(pos_entropy >= 1 - labeled_psi[:positive_features.shape[0]])
-            constraints.append(neg_entropy >= 1 - labeled_psi[positive_features.shape[0]:])
-            constraints.append(labeled_psi >= 0)
-            objective += (cp.sum(labeled_psi) / (positive_features.shape[0] + negative_features.shape[0]))
-
-
 
 
         prob = cp.Problem(cp.Minimize(objective), constraints=constraints)

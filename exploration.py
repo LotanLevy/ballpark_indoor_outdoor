@@ -6,6 +6,8 @@ import numpy as np
 import json
 from data_tools.dataloader import Dataloader
 import visualizations.visualization_helper as vh
+from shutil import copyfile
+
 
 
 def get_args_parser():
@@ -31,7 +33,7 @@ def get_args_parser():
 
 
     parser.add_argument('--max_imgs_in_image',  type=int, default=30)
-    parser.add_argument('--max_classes',  type=int, default=20)
+    parser.add_argument('--max_classes',  type=float, default=0.4)
 
     parser.add_argument('--best_type_for_imgs',  type=str, default="max", choices=["mean", "max"])
     parser.add_argument('--best_type_for_cls',  type=str, default="max", choices=["mean", "max"])
@@ -61,22 +63,26 @@ class ModelPreds:
 
     def get_relevant_classes(self):
         sorted_keys = [k for k, v in sorted(self.means.items(), key=lambda item: item[1])]
-        max_position = len(sorted_keys) + 1
+        classes_num = int(np.floor(self.max_classes_num * len(sorted_keys)))
+        max_position = len(sorted_keys) - 1
+
+        print("cls_num", classes_num, len(sorted_keys), max(0, max_position - classes_num), max_position+1)
+
         if self.classes_pos == "mean":
             max_position = np.int(np.floor(max_position * self.mean_pos))
-        return sorted_keys[max_position - self.max_classes_num: max_position]
+        return sorted_keys[max(0, max_position - classes_num + 1) : max_position+1]
 
     def get_relevant_images(self, all_scores, classes, all_paths):
-        max_position = len(all_scores) + 1
+        max_position = len(all_scores) - 1
         if self.images_pos == "mean":
             max_position = np.int(np.floor(max_position * self.mean_pos))
 
-        relevant_indices = np.argsort(all_scores)[max_position - self.max_images_num: max_position]
+        relevant_indices = np.argsort(all_scores)[max_position - self.max_images_num + 1: max_position + 1]
         relevant_paths = [all_paths[i] for i in relevant_indices]
         if classes is None:
             titles = ["{}".format("%.2f" % all_scores[i]) for i in relevant_indices]
         else:
-            titles = ["{}_{}".format(classes[i], "%.2f" % all_scores[i]) for i in relevant_indices]
+            titles = ["{}_{}".format(classes[i][:min(len(classes[i]), 8)], "%.2f" % all_scores[i]) for i in relevant_indices]
         return relevant_paths, titles
 
     def get_repre_images_for_cls(self, cls):
@@ -97,7 +103,21 @@ class ModelPreds:
         return self.get_relevant_images(all_scores, classes, all_paths)
 
 
-
+    def save_max_for_classes(self, output_path, low_percent=40, high_percent=100):
+        dir_path = os.path.join(output_path, "{}_from_{}_to_{}".format(self.name, low_percent, high_percent))
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        sorted_keys = [k for k, v in sorted(self.means.items(), key=lambda item: item[1])]
+        small_idx = np.floor(len(sorted_keys) * (low_percent/100)).astype(np.int)
+        max_idx = np.ceil(len(sorted_keys) * (high_percent/100)).astype(np.int)
+        print("saving from {} to {}".format(small_idx, max_idx))
+        cls2path = dict()
+        cls2name = dict()
+        for i, cls in zip(range(small_idx, max_idx+1), sorted_keys[small_idx: max_idx+1]):
+            max_idx = np.argmax(self.preds[cls])
+            cls2path[cls] = self.paths[cls][max_idx]
+            name = "{}_{}_{}".format(i, cls, "%.2f" % self.means[cls])
+            copyfile(cls2path[cls], os.path.join(dir_path, name.replace(".", "_")+".jpg"))
 
 
 
@@ -150,12 +170,14 @@ def display_best_imgs_for_relevant_cls(model, cols_num, image_size, output_path)
     image = vh.build_image(relevant_paths, titles, cols_num, image_size)
     if image is None:
         return
-    title = "{}_best_images_{}_images_for_best_cls".format(model.name, len(relevant_paths))
+    title = "{}_best_images_for_best_cls".format(model.name)
     vh.display_images_of_image(image, 448, 4, title, output_path)
 
 def save_best_classes(output_path, model):
     with open(os.path.join(output_path, "{}_best_classes.txt".format(model.name)), 'w') as file:
-        file.write(str(model.get_relevant_classes()))
+        for k, v in sorted(model.means.items(), key=lambda item: item[1]):
+            file.write(str(k) + ", " + str(v) + "\n")
+        # file.write(str([(k,model.means[k]) for k, v in sorted(model.means.items(), key=lambda item: item[1])]))
 
 def display_imgs_for_class(model, cols_num, image_size, output_path):
     new_output_path = os.path.join(output_path, "class_representations")
@@ -164,10 +186,11 @@ def display_imgs_for_class(model, cols_num, image_size, output_path):
     relevant_classes = model.get_relevant_classes()
     for cls in relevant_classes:
         relevant_paths, titles = model.get_repre_images_for_cls(cls=cls)
+        print(cls, len(relevant_paths))
         image = vh.build_image(relevant_paths, titles, cols_num, image_size)
         if image is None:
             return
-        title = "{}_best_images_{}_images_for_cls_{}".format(model.name, len(relevant_paths), cls)
+        title = "{}_best_images_for_cls_{}[{}]".format(model.name, cls, ("%.2f" % model.means[cls]).replace(".", "_"))
         vh.display_images_of_image(image, 448, 4, title, new_output_path)
 
 
@@ -201,13 +224,14 @@ def main():
     print("create outputs")
 
     for name, model in models.items():
-        if args.display_best_imgs:
-            display_best_imgs(model, args.cols_num, args.image_size, args.output_path)
-        if args.display_best_imgs_for_relevant_cls:
-            display_best_imgs_for_relevant_cls(model, args.cols_num, args.image_size, args.output_path)
-        if args.display_imgs_for_class:
-            display_imgs_for_class(model, args.cols_num, args.image_size, args.output_path)
+        # if args.display_best_imgs:
+        display_best_imgs(model, args.cols_num, args.image_size, args.output_path)
+        # if args.display_best_imgs_for_relevant_cls:
+        display_best_imgs_for_relevant_cls(model, args.cols_num, args.image_size, args.output_path)
+        # if args.display_imgs_for_class:
+        # display_imgs_for_class(model, args.cols_num, args.image_size, args.output_path)
         save_best_classes(args.output_path, model)
+        model.save_max_for_classes(args.output_path)
 
 if __name__=="__main__":
     main()

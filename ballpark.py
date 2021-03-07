@@ -68,10 +68,10 @@ def run_svm(constraints_parser, train_bags, labeled_bags, polar_bound, output_pa
         print("There is no polar positive classes")
 
     X, y, paths = prepare_svm_data(train_bags, negative_classes, positive_classes)
-    if labeled_bags is not None:
-        X_l, y_l, paths_l = prepare_svm_data(labeled_bags, ["0"], ["1"])
-        X = np.concatenate((X, X_l))
-        y= np.concatenate((y, y_l))
+    # if labeled_bags is not None:
+    #     X_l, y_l, paths_l = prepare_svm_data(labeled_bags, ["0"], ["1"])
+    #     X = np.concatenate((X, X_l))
+    #     y= np.concatenate((y, y_l))
 
     print("svm with {} train on data with size {}".format(polar_bound, X.shape[0]))
 
