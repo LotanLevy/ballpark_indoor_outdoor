@@ -31,12 +31,18 @@ def get_features_model(model_name, input_size, features_level=-2):
 
 
 def get_prediction_func(weights_ckpt_path, bias_ckpt_path):
-    w = np.load(weights_ckpt_path)
+    w = np.load(weights_ckpt_path, allow_pickle=True)
+    print(w)
+    print(w.shape)
+    print(bias_ckpt_path)
     if bias_ckpt_path != '':
-        b = np.load(bias_ckpt_path)
+        b = np.load(bias_ckpt_path, allow_pickle=True)
+        print(b)
     else:
+        print(weights_ckpt_path, bias_ckpt_path)
         b = w[0]
         w = w[1:]
+    print("out")
 
     return lambda X: get_pred(w, b, X)
 
