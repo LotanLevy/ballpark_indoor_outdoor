@@ -25,7 +25,10 @@ def build_image(images_paths, titles, cols, image_size):
     for i in range(last_idx, 0, -cols):
         start = max(0, i - cols + 1)
         row_paths = [images_paths[i] for i in range(start, i+1)]
-        row_titles = [titles[i] for i in range(start, i+1)]
+        if titles is not None:
+            row_titles = [titles[i] for i in range(start, i+1)]
+        else:
+            row_titles = None
         rows.append(create_row_image(row_paths, image_size, titles=row_titles, cols_num=cols))
     if len(rows) == 0:
         return None

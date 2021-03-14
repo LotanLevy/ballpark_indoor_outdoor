@@ -105,14 +105,15 @@ class ConstraintsParser:
             return None, None, None
         return lower, cls_name, upper
 
-    def get_negative_and_positive_classes_by_bound(self, bound):
+    def get_negative_and_positive_classes_by_bound(self, bound): # lower bound first
         negative_classes, positive_classes = [], []
+        print(bound[0], bound[1])
         for cls in self.upper_bounds:
-            if self.upper_bounds[cls] <= bound:
+            if self.upper_bounds[cls] <= bound[1]:
                 negative_classes.append(cls)
 
         for cls in self.lower_bounds:
-            if 1 - self.lower_bounds[cls] <= bound:
+            if 1 - self.lower_bounds[cls] <= bound[0]:
                 positive_classes.append(cls)
         return negative_classes, positive_classes
 

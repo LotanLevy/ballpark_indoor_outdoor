@@ -40,7 +40,7 @@ def get_args_parser():
     parser.add_argument('--loss_type',  type=str, default="l2", choices=["l2", "entropy"])
     parser.add_argument('--nn_model', type=str, default="vgg16", choices=["vgg16", "resnet50"])
 
-    parser.add_argument('--polar_svm_param', type=float, default=0.3, help="constraints bound for the polar classes")
+    parser.add_argument('--polar_svm_param', type=str, default="0.3,0.3", help="constraints bound for the polar classes")
 
     parser.add_argument('--test_type',  type=str, choices=['explore', 'valid', 'pass'], default='valid')
 
@@ -54,11 +54,11 @@ def get_args_parser():
     return parser
 
 
-def run_svm(constraints_parser, train_bags, labeled_bags, polar_bound, output_path):
+def run_svm(constraints_parser, train_bags, labeled_bags, polar_bounds, output_path):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     # prepare data for svm
-    negative_classes, positive_classes = constraints_parser.get_negative_and_positive_classes_by_bound(polar_bound)
+    negative_classes, positive_classes = constraints_parser.get_negative_and_positive_classes_by_bound(polar_bounds) # lower bound first
     with open(os.path.join(output_path, "svm_classes.txt"), 'w') as f:
         f.write("positive_classes_{}\nnegative_classes_{}".format(str(positive_classes), str(negative_classes)))
 
@@ -73,7 +73,7 @@ def run_svm(constraints_parser, train_bags, labeled_bags, polar_bound, output_pa
     #     X = np.concatenate((X, X_l))
     #     y= np.concatenate((y, y_l))
 
-    print("svm with {} train on data with size {}".format(polar_bound, X.shape[0]))
+    print("svm with {},{} train on data with size {}".format(polar_bounds[0], polar_bounds[1], X.shape[0]))
 
     clf = svm.SVC(kernel='linear')
 
@@ -116,6 +116,7 @@ def run_ballpark_model(ballpark_type, constraints, train_bags, labeled_bags, reg
 
 
 
+
 def main():
     args = get_args_parser().parse_args()
     print(vars(args))
@@ -125,6 +126,10 @@ def main():
         json.dump(vars(args), f, indent=4)
     print("Reads constraints file")
     constraints = ConstraintsParser(args.constraints_file)
+
+    bounds = args.polar_svm_param.split(",")
+    bounds = float(bounds[0]), float(bounds[1])
+
 
     print("Initialize dataloader")
     preprocessing_func = get_preprocessing_func_by_name(args.nn_model)
@@ -139,8 +144,8 @@ def main():
 
     print("Run SVM model")
     if not args.no_svm:
-        svm_output_path = os.path.join(args.output_path, os.path.join("svm_model", "{}".format(str(args.polar_svm_param).replace(".", ""))))
-        svm_w, svm_b = run_svm(constraints, train_bags, labeled_bags, args.polar_svm_param, svm_output_path)
+        svm_output_path = os.path.join(args.output_path, os.path.join("svm_model", "{}_{}".format(str(bounds[0]).replace(".", ""), str(bounds[1]).replace(".", ""))))
+        svm_w, svm_b = run_svm(constraints, train_bags, labeled_bags, bounds, svm_output_path)
     if not args.no_ballpark:
         ballpark_output_path = os.path.join(args.output_path, "ballpark_model")
         ballpark_w = run_ballpark_model(args.cls_method, constraints, train_bags, labeled_bags, args.reg_val, args.reg_type, ballpark_output_path)

@@ -10,6 +10,7 @@ from args_helper import get_features_model, get_preprocessing_func_by_name, pars
     ,prepare_svm_data
 from evaluation_tools.evaluate import *
 from affordance_tools.ContraintsParser import ConstraintsParser
+import visualizations.visualization_helper as vh
 
 from sklearn.metrics import confusion_matrix
 
@@ -78,6 +79,15 @@ def clear_data_by_constraints_bags(constraints_file, X, y, paths):
     return X[np.array(legal_indices)], y[np.array(legal_indices)], clean_paths
 
 
+def parse_classes_from_paths(paths):
+    classes = []
+    for path in paths:
+        if "__" in path:
+            classes.append(os.path.basename(path).split("__")[0])
+        else:
+            classes.append("")
+    return classes
+
 
 
 def main():
@@ -113,6 +123,17 @@ def main():
 
 
         models_evaluations[name] = evaluator.evaluate(scores, y, threshold)
+
+        tn_paths, fp_paths, fn_paths, tp_paths = get_paths_of_confusion_matrix(paths, scores, y, evaluator)
+        fn_maximal_paths, fn_scores = select_paths_by_number(fn_paths, 30, position="max")# creative thinking
+        fp_maximal_paths, fp_scores = select_paths_by_number(fp_paths, 30, position="max")# wrong classifications
+        fn_image = vh.build_image(list(fn_maximal_paths), ["{} {}".format("%.2f" % score_cls[0], score_cls[1]) for score_cls in list(zip(fn_scores, parse_classes_from_paths(fn_maximal_paths)))], 10, 448)
+        fp_image = vh.build_image(list(fp_maximal_paths), ["{} {}".format("%.2f" % score_cls[0], score_cls[1]) for score_cls in list(zip(fp_scores, parse_classes_from_paths(fp_maximal_paths)))], 10, 448)
+
+        vh.display_images_of_image(fn_image, 448, 4, "{}_fn_with_maximal_scores".format(name), args.output_path)
+        vh.display_images_of_image(fp_image, 448, 4, "{}_fp_with_maximal_scores".format(name), args.output_path)
+
+
 
     save_evaluations(models_evaluations, args.output_path)
 

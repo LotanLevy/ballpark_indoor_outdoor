@@ -58,6 +58,8 @@ def parse_weights_paths(models_args):
         name, path = args[0], args[1]
         if "ballpark" in name:
             weights_path = os.path.join(path, "ballpark_weights.npy")
+            if not os.path.exists(weights_path):
+                continue
             bias_path = ""
             pred_func = get_prediction_func(weights_path, bias_path)
             weights[name] = pred_func
@@ -65,6 +67,8 @@ def parse_weights_paths(models_args):
             for subdir in os.listdir(path):
                 weights_path = os.path.join(os.path.join(path, subdir), "svm_weights.npy")
                 bias_path = os.path.join(os.path.join(path, subdir), "svm_bias.npy")
+                if not os.path.exists(weights_path):
+                    continue
                 pred_func = get_prediction_func(weights_path, bias_path)
                 weights[name + "_{}".format(subdir)] = pred_func
         else:

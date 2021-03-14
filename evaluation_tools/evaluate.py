@@ -268,6 +268,29 @@ class Evaluator:
         return ['tn', 'fp', 'fn', 'tp', 'accuracy', 'precision', 'recall', 'f_score']
 
 
+def get_paths_of_confusion_matrix(paths, scores, labels, evaluator):
+    tn_paths, fp_paths, fn_paths, tp_paths = dict(), dict(), dict(), dict()
+    pred_labels = get_classification_by_values(evaluator.positive_val, evaluator.negative_val, scores, evaluator.values["threshold"])
+
+    for pred, label, path, score in zip(pred_labels, labels, paths, scores):
+        if pred == evaluator.negative_val and label == evaluator.negative_val:
+            tn_paths[path] = score
+        elif pred == evaluator.positive_val and label == evaluator.negative_val:
+            fp_paths[path] = score
+        elif pred == evaluator.negative_val and label == evaluator.positive_val:
+            fn_paths[path] = score
+        else:
+            tp_paths[path] = score
+    return tn_paths, fp_paths, fn_paths, tp_paths
+
+
+def select_paths_by_number(paths2scores, paths_number, position="max"):
+    sorted_paths_with_scores = [path_and_score for path_and_score in sorted(paths2scores.items(), key=lambda item: item[1])]
+    relevant_items = sorted_paths_with_scores[-1*paths_number:] if position == "max" else sorted_paths_with_scores[:paths_number]
+    return list(zip(*relevant_items))
+
+
+
 def save_evaluations(evaluations_for_models, output_path):
     with open(os.path.join(output_path, 'evaluations.csv'), 'w', newline='') as file:
         writer = csv.writer(file)
