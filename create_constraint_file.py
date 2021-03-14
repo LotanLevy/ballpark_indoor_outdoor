@@ -97,14 +97,19 @@ def get_all_bounds(constraints_path):
     return constraints_bounds
 
 def write_bounds_into_file(all_bounds_dict, dest_full_path):
+    first_line=True
     with open(dest_full_path, "w") as f:
         for name, bounds in all_bounds_dict.items():
-            if bounds[0] is not None and bounds[1] is not None:
-                f.write("\n{} < {} < {}".format(format(bounds[0], '.2f'), name, format(bounds[1], '.2f')))
-            elif bounds[0] is not None:
-                f.write("\n{} > {}".format(name, format(bounds[0], '.2f')))
+            if first_line:
+                first_line = False
             else:
-                f.write("\n{} < {}".format(name, format(bounds[1], '.2f')))
+                f.write("\n")
+            if bounds[0] is not None and bounds[1] is not None:
+                f.write("{} < {} < {}".format(format(bounds[0], '.2f'), name, format(bounds[1], '.2f')))
+            elif bounds[0] is not None:
+                f.write("{} > {}".format(name, format(bounds[0], '.2f')))
+            else:
+                f.write("{} < {}".format(name, format(bounds[1], '.2f')))
 
 
 def get_args_parser():

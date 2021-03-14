@@ -5,10 +5,9 @@ from shutil import copyfile
 
 ROOT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_merged"
 
-OUTPUT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\new\\dine\\unlabeled_test"
+OUTPUT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\new\\bicycling\\labeled_test"
 
-TRAIN_CLASSES = ['restaurant', 'classroom', 'church', 'bar', 'dinning_car', 'diner', 'kitchenette', 'market',
-                 'roof_garden', 'park', 'coffee_shop', 'swimming_pool', 'tower', 'beach', 'garden', 'balcony']
+TRAIN_CLASSES = []
 
 def get_relevant_dirs(root, excluded_classes):
     relevant_dirs = []
