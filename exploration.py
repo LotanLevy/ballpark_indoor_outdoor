@@ -34,9 +34,14 @@ def get_args_parser():
 
     parser.add_argument('--max_imgs_in_image',  type=int, default=30)
     parser.add_argument('--max_classes',  type=float, default=0.4)
+    parser.add_argument('--best_type_for_cls',  type=str, default="max", choices=["mean", "max"])
+
+
+    parser.add_argument('--peeks',  type=str, default="1,0.75")
+
+
 
     parser.add_argument('--best_type_for_imgs',  type=str, default="max", choices=["mean", "max"])
-    parser.add_argument('--best_type_for_cls',  type=str, default="max", choices=["mean", "max"])
     parser.add_argument('--mean_pos',  type=int, default=0.75)
 
 
@@ -72,10 +77,9 @@ class ModelPreds:
             max_position = np.int(np.floor(max_position * self.mean_pos))
         return sorted_keys[max(0, max_position - classes_num + 1) : max_position+1]
 
-    def get_relevant_images(self, all_scores, classes, all_paths):
-        max_position = len(all_scores) - 1
-        if self.images_pos == "mean":
-            max_position = np.int(np.floor(max_position * self.mean_pos))
+    def get_relevant_images(self, all_scores, classes, all_paths, peek_pos):
+        max_position = np.int(np.floor((len(all_scores) - 1) * peek_pos))
+        print(peek_pos, max_position, len(all_scores) - 1)
 
         relevant_indices = np.argsort(all_scores)[max_position - self.max_images_num + 1: max_position + 1]
         relevant_paths = [all_paths[i] for i in relevant_indices]
@@ -85,10 +89,10 @@ class ModelPreds:
             titles = ["{}_{}".format(classes[i][:min(len(classes[i]), 8)], "%.2f" % all_scores[i]) for i in relevant_indices]
         return relevant_paths, titles
 
-    def get_repre_images_for_cls(self, cls):
-        return self.get_relevant_images(self.preds[cls], None, self.paths[cls])
+    def get_repre_images_for_cls(self, cls, peek_pos):
+        return self.get_relevant_images(self.preds[cls], None, self.paths[cls], peek_pos)
 
-    def get_repre_images_for_models(self, relevant_classes=None):
+    def get_repre_images_for_models(self, peek_pos, relevant_classes=None):
         all_scores = np.array([])
         classes = []
         all_paths = []
@@ -100,7 +104,7 @@ class ModelPreds:
             all_scores = np.concatenate((all_scores, self.preds[cls]))
             all_paths += self.paths[cls]
             classes += [cls] * len(self.paths[cls])
-        return self.get_relevant_images(all_scores, classes, all_paths)
+        return self.get_relevant_images(all_scores, classes, all_paths, peek_pos)
 
 
     def save_max_for_classes(self, output_path, low_percent=40, high_percent=100):
@@ -156,21 +160,21 @@ def parse_excluded_file(excluded_bags_file):
         print("excluded_bags", excluded_bags_clean)
         return excluded_bags_clean
 
-def display_best_imgs(model, cols_num, image_size, output_path):
-    relevant_paths, titles = model.get_repre_images_for_models()
+def display_best_imgs(model, cols_num, image_size, output_path, peek_pos):
+    relevant_paths, titles = model.get_repre_images_for_models(peek_pos)
     image = vh.build_image(relevant_paths, titles, cols_num, image_size)
     if image is None:
         return
-    title = "{}_best_images_{}_images_for".format(model.name, len(relevant_paths))
+    title = "{}_best_images_{}_images_for_peek_{}".format(model.name, len(relevant_paths), str(peek_pos).replace(".", "_"))
     vh.display_images_of_image(image, 448, 4, title, output_path)
 
-def display_best_imgs_for_relevant_cls(model, cols_num, image_size, output_path):
+def display_best_imgs_for_relevant_cls(model, cols_num, image_size, output_path, peek_pos):
     relevant_classes = model.get_relevant_classes()
-    relevant_paths, titles = model.get_repre_images_for_models(relevant_classes=relevant_classes)
+    relevant_paths, titles = model.get_repre_images_for_models(peek_pos, relevant_classes=relevant_classes)
     image = vh.build_image(relevant_paths, titles, cols_num, image_size)
     if image is None:
         return
-    title = "{}_best_images_for_best_cls".format(model.name)
+    title = "{}_best_images_for_best_cls_for_peek_{}".format(model.name, str(peek_pos).replace(".", "_"))
     vh.display_images_of_image(image, 448, 4, title, output_path)
 
 def save_best_classes(output_path, model):
@@ -179,13 +183,13 @@ def save_best_classes(output_path, model):
             file.write(str(k) + ", " + str(v) + "\n")
         # file.write(str([(k,model.means[k]) for k, v in sorted(model.means.items(), key=lambda item: item[1])]))
 
-def display_imgs_for_class(model, cols_num, image_size, output_path):
+def display_imgs_for_class(model, cols_num, image_size, output_path, peek_pos):
     new_output_path = os.path.join(output_path, "class_representations")
     if not os.path.exists(new_output_path):
         os.makedirs(new_output_path)
     relevant_classes = model.get_relevant_classes()
     for cls in relevant_classes:
-        relevant_paths, titles = model.get_repre_images_for_cls(cls=cls)
+        relevant_paths, titles = model.get_repre_images_for_cls(cls=cls, peek_pos=peek_pos)
         print(cls, len(relevant_paths))
         image = vh.build_image(relevant_paths, titles, cols_num, image_size)
         if image is None:
@@ -203,6 +207,9 @@ def main():
 
     with open(os.path.join(args.output_path, "experiment_params.txt"), 'w') as f:
         json.dump(vars(args), f, indent=4)
+
+    peeks_list = [float(item.strip()) for item in args.peeks.split(",")]
+    print(peeks_list)
 
     models2pred_func = args_helper.parse_weights_paths(args.models_paths)
     excluded_bags = parse_excluded_file(args.excluded_bags)
@@ -225,9 +232,10 @@ def main():
 
     for name, model in models.items():
         # if args.display_best_imgs:
-        display_best_imgs(model, args.cols_num, args.image_size, args.output_path)
+        for peek_pos in peeks_list:
+            display_best_imgs(model, args.cols_num, args.image_size, args.output_path, peek_pos)
         # if args.display_best_imgs_for_relevant_cls:
-        display_best_imgs_for_relevant_cls(model, args.cols_num, args.image_size, args.output_path)
+            display_best_imgs_for_relevant_cls(model, args.cols_num, args.image_size, args.output_path, peek_pos)
         # if args.display_imgs_for_class:
         # display_imgs_for_class(model, args.cols_num, args.image_size, args.output_path)
         save_best_classes(args.output_path, model)

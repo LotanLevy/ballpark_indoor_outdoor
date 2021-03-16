@@ -53,14 +53,15 @@ def parse_crowd_data(crowd_data_file, data_path):
     actions2place = dict()
     for title, avg in df.iteritems():
         action, place = title.strip().split(",")
-        if place in word2classes:
-
-            for cls in word2classes[place]:
-                if action not in actions2place:
-                    actions2place[action] = dict()
-                actions2place[action][cls] = avg/10.0
-        else:
-            print("{} not in csv map file {}".format(title, data_path))
+        actions2place[action][place] = avg / 10.0
+        # if place in word2classes:
+        #
+        #     for cls in word2classes[place]:
+        #         if action not in actions2place:
+        #             actions2place[action] = dict()
+        #         actions2place[action][cls] = avg/10.0
+        # else:
+        #     print("{} not in csv map file {}".format(title, data_path))
 
     return actions2place
 
