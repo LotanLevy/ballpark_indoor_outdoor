@@ -2,7 +2,10 @@ import os
 import numpy as np
 labels_map = {"1": 1, "0": 0}
 from affordance_tools.ContraintsParser import ConstraintsParser
+import pandas as pd
 import argparse
+import sys
+import csv
 
 root = "C:\\Users\\lotan\\Documents\\studies\\\Affordances\\datasets\\ballpark_datasets\\desert\\train"
 dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_indoor_outdoor\\explore_constraints\\desert_true_constraints_eps_01.txt"
@@ -25,6 +28,42 @@ def get_indoor_size(root_path, sub_cls2label):
             print(cls + " is empty")
         parts[cls] = positive_size/total_size
     return parts
+
+def get_relevant_classes(word, all_classes):
+    relevant_classes = []
+    for cls in all_classes:
+        if word in cls:
+            relevant_classes.append(cls)
+    return relevant_classes
+
+
+def parse_crowd_data(crowd_data_file, data_path):
+    df = pd.read_csv(crowd_data_file)
+    df = df.mean(axis=0)
+
+    classes = pd.read_csv(data_path, header=None)
+    word2classes = dict()
+    with open(data_path) as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            word2classes[row[0].replace("'", "")] = row[1].replace("'", "").split(",")
+    print(df)
+
+
+    actions2place = dict()
+    for title, avg in df.iteritems():
+        action, place = title.strip().split(",")
+        if place in word2classes:
+
+            for cls in word2classes[place]:
+                if action not in actions2place:
+                    actions2place[action] = dict()
+                actions2place[action][cls] = avg/10.0
+        else:
+            print("{} not in csv map file {}".format(title, data_path))
+
+    return actions2place
+
 
 def create_lower_and_upper_bounds(true_percent, epsilon):
     parts = dict()
@@ -118,6 +157,9 @@ def get_args_parser():
     parser.add_argument('--dest_path',  '-d', type=str, required=True)
     parser.add_argument('--expand_constraints',  '-expand', action="store_true")
     parser.add_argument('--create_auto_constraints', '-auto', action="store_true")
+    parser.add_argument('--parse_crowd', '-crowd', action="store_true")
+    parser.add_argument('--data_path',  '-data', type=str, required='-crowd' in sys.argv)
+
     parser.add_argument('--auto_eps', '-e', type=float, default=0.1)
     parser.add_argument('--neg_label', type=str, default="0")
     parser.add_argument('--pos_label', type=str, default="1")
@@ -132,7 +174,7 @@ def main():
         dest_file = os.path.join(args.dest_path, "{}_full.txt".format(os.path.abspath(args.src_path).split(".")[0]))
         all_bounds = get_all_bounds(args.src_path)
         write_bounds_into_file(all_bounds, dest_file)
-    else:
+    elif args.create_auto_constraints:
         # creates constraints from split dir
         labels_map = {args.pos_label: 1, args.neg_label: 0}
         true_indoor_percent = get_indoor_size(args.src_path, labels_map)
@@ -140,6 +182,15 @@ def main():
         diff_bounds = create_mutual_bounds(true_indoor_percent, args.auto_eps)
         all_bounds = {**bounds, **diff_bounds}
         write_bounds(all_bounds, args.dest_path)
+    elif args.parse_crowd:
+        true_positive_percent_for_action = parse_crowd_data(args.src_path, args.data_path)
+        for action in true_positive_percent_for_action:
+            bounds = create_lower_and_upper_bounds(true_positive_percent_for_action[action], args.auto_eps)
+            diff_bounds = create_mutual_bounds(true_positive_percent_for_action[action], args.auto_eps)
+            all_bounds = {**bounds, **diff_bounds}
+            dest_path = os.path.join(args.dest_path, "{}_constraints.txt".format(action))
+            write_bounds(all_bounds, dest_path)
+
 
 
 

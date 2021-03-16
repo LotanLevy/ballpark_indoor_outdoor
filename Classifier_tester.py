@@ -88,6 +88,17 @@ def parse_classes_from_paths(paths):
             classes.append("")
     return classes
 
+def write_paths2scores(paths, scores, path):
+    first = True
+    with open(path, 'w') as file:
+        for path, pred in list(zip(paths, scores)):
+            if not first:
+                file.write("\n")
+            else:
+                first = False
+            file.write("{},{}".format(path, pred))
+
+
 
 
 def main():
@@ -129,6 +140,8 @@ def main():
         fp_maximal_paths, fp_scores = select_paths_by_number(fp_paths, 30, position="max")# wrong classifications
         fn_image = vh.build_image(list(fn_maximal_paths), ["{} {}".format("%.2f" % score_cls[0], score_cls[1]) for score_cls in list(zip(fn_scores, parse_classes_from_paths(fn_maximal_paths)))], 10, 448)
         fp_image = vh.build_image(list(fp_maximal_paths), ["{} {}".format("%.2f" % score_cls[0], score_cls[1]) for score_cls in list(zip(fp_scores, parse_classes_from_paths(fp_maximal_paths)))], 10, 448)
+        write_paths2scores(fn_maximal_paths, fn_scores, os.path.join(args.output_path, "{}_fn.txt".format(name)))
+        write_paths2scores(fn_maximal_paths, fn_scores, os.path.join(args.output_path, "{}_fp.txt".format(name)))
 
         vh.display_images_of_image(fn_image, 448, 4, "{}_fn_with_maximal_scores".format(name), args.output_path)
         vh.display_images_of_image(fp_image, 448, 4, "{}_fp_with_maximal_scores".format(name), args.output_path)
