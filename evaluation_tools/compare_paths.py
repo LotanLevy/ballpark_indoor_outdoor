@@ -22,8 +22,9 @@ def copy_images_of_df(df, output_path):
     print(df[1].tolist())
 
     print(df[0].tolist())
-    for i, path in enumerate(df[0].tolist()):
-        copyfile(path, os.path.join(output_path, "{}.jpg".format(i)))
+    for i, path_and_score in enumerate(list(zip(df[0].tolist(), df[1].tolist()))):
+        path, score = path_and_score
+        copyfile(path, os.path.join(output_path, "{}_{}.jpg".format(i, ("%.2f" % float(score)).replace(".", "_"))))
 
 
 
@@ -38,6 +39,12 @@ def main():
 
     df1.drop(df1[cond1].index, inplace=True)
     df2.drop(df2[cond2].index, inplace=True)
+
+    if not os.path.exists(os.path.join(args.output_path, args.name1)):
+        os.makedirs(os.path.join(args.output_path, args.name1))
+
+    if not os.path.exists(os.path.join(args.output_path, args.name2)):
+        os.makedirs(os.path.join(args.output_path, args.name2))
 
     copy_images_of_df(df1, os.path.join(args.output_path, args.name1))
     copy_images_of_df(df2, os.path.join(args.output_path, args.name2))

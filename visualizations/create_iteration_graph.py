@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 
 
 
-PATHS = "iter0$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\buy\\buy_explore\\explore_0\\regress_results\\evaluations.csv," \
-        "iter1$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\buy\\buy_explore\\explore_1\\regress_results\\evaluations.csv," \
-        "iter2$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\buy\\buy_explore\\explore_2\\regress_results\\evaluations.csv," \
-        "iter3$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\buy\\buy_explore\\explore_3\\regress_results\\evaluations.csv"
+PATHS = "iter0$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\dine\\new_explore\\explore_0\\regress_results\\evaluations.csv," \
+        "iter1$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\dine\\new_explore\\explore_1\\regress_results\\evaluations.csv," \
+        "iter2$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\dine\\new_explore\\explore_2\\regress_results\\evaluations.csv," \
+        "iter3$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\dine\\new_explore\\explore_3\\regress_results\\evaluations.csv"
         # "iter4$C:\\Users\\lotan\\Documents\\studies\\phoenix\\ballpark_experiments\\new_experiments\\buy\\buy_explore\\explore_4\\regress_results\\evaluations.csv"
 
 GRAPH_FIELD = "auc"
