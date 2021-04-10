@@ -11,7 +11,7 @@ def get_args_parser():
     parser.add_argument('--constraints_file', '-cf',  type=str, required=True)
     parser.add_argument('--root_path',  type=str, required=True)
 
-    parser.add_argument('--polar_param', type=float, default=0.3, help="constraints bound for the polar classes")
+    parser.add_argument('--polar_param', type=str, default="0.3,0.3", help="constraints bound for the polar classes")
 
     parser.add_argument('--output_path', type=str, default=os.getcwd())
 
@@ -39,7 +39,8 @@ def main():
             os.makedirs(os.path.join(args.output_path, sub_dir))
 
     constraints_parser = ConstraintsParser(args.constraints_file)
-    negative_classes, positive_classes = constraints_parser.get_negative_and_positive_classes_by_bound(args.polar_param)
+    polar_params = [float(num) for num in args.polar_param.split(",")]
+    negative_classes, positive_classes = constraints_parser.get_negative_and_positive_classes_by_bound(polar_params)
 
     print(negative_classes)
     print(positive_classes)
