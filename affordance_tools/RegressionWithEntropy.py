@@ -6,7 +6,7 @@ from cvxpy.expressions.constants import Constant
 NORM = 2
 
 class RegressionWithEntropy:
-    def __init__(self, constraints_parser, bags_dict):
+    def __init__(self, constraints_parser, bags_dict, labeled_bags):
         self.constraints_parser = constraints_parser
         self.bags_dict = bags_dict
 
@@ -99,19 +99,22 @@ class RegressionWithEntropy:
 
         constraints = []
         loss = Constant(0)
-        entropy = Constant(0)
+        # entropy = Constant(0)
 
         constraints.append(yhat >= 0)
         constraints.append(yhat <= 1)
 
-        if reg_type == "l2":
-            reg = cp.square(cp.norm(w, NORM))
-        elif reg_type == "entropy":
-            reg = -cp.sum(cp.entr(w))
-        else:
-            print("wrong reg")
-            return None, None, None
-        print(reg_type, reg)
+        reg = cp.square(cp.norm(w, NORM))
+
+
+        # if reg_type == "l2":
+        #     reg = cp.square(cp.norm(w, NORM))
+        # elif reg_type == "entropy":
+        #     reg = -cp.sum(cp.entr(w))
+        # else:
+        #     print("wrong reg")
+        #     return None, None, None
+        # print(reg_type, reg)
 
 
         for cls, bag_indices in self.bag2indices_range.items():
@@ -124,8 +127,8 @@ class RegressionWithEntropy:
 
             # loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
             preds = bag_features @ w
-            loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
-            entropy += cp.sum(-cp.multiply(yhat[bag_indices], cp.log(preds))-cp.multiply(1-yhat[bag_indices], cp.log(1-preds)))
+            # loss += cp.sum_squares((bag_features * w)-yhat[bag_indices])
+            loss += cp.sum(cp.kl_div(yhat[bag_indices], preds))
 
 
             constraints.append((preds) >= 0)
@@ -157,7 +160,7 @@ class RegressionWithEntropy:
             constraints.append((1. / (len(high_bag))) * cp.sum(yhat[high_bag_idx_range]) -
                                (1. / (len(low_bag))) * cp.sum(yhat[low_bag_idx_range]) <= upper_bound)
 
-        constraints.append(entropy <= psi)
+        # constraints.append(entropy <= psi)
 
         prob = cp.Problem(cp.Minimize(loss/self.data_size + reg_val*reg), constraints=constraints)
         # prob = cp.Problem(cp.Minimize(psi), constraints=constraints)

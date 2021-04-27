@@ -4,7 +4,7 @@ import itertools
 from cvxpy.expressions.constants import Constant
 
 NORM = 2
-LOWER_BOUND_FOR_ONE_CLASS = 0.7
+LOWER_BOUND_FOR_ONE_CLASS = 0.5
 class OneClassRegressionModel:
     def __init__(self, constraints_parser, bags_dict, labeled_bags):
         self.constraints_parser = constraints_parser
@@ -127,20 +127,22 @@ class OneClassRegressionModel:
         objective = loss/self.data_size + reg_val*reg
 
 
-        if self.labeled_bags is not None:
-            positive_features = self.add_bias(self.labeled_bags["1"].get_features()[0])
-            negative_features = self.add_bias(self.labeled_bags["0"].get_features()[0])
-            print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
+        # if self.labeled_bags is not None:
+        #     positive_features = self.add_bias(self.labeled_bags["1"].get_features()[0])
+        #     negative_features = self.add_bias(self.labeled_bags["0"].get_features()[0])
+        #     print("constraints on {} labeled data".format(positive_features.shape[0] + negative_features.shape[0]))
+        #
+        #     labeled_loss = Constant(0)
+        #
+        #     pos_y = np.ones(positive_features.shape[0])
+        #     neg_y = np.zeros(negative_features.shape[0])
+        #
+        #     labeled_loss += cp.sum_squares((positive_features * w) - pos_y)
+        #     labeled_loss += cp.sum_squares((negative_features * w) - neg_y)
+        #
+        #     objective += 0.1 * (labeled_loss / (positive_features.shape[0] + negative_features.shape[0]))
 
-            labeled_loss = Constant(0)
-
-            pos_y = np.ones(positive_features.shape[0])
-            neg_y = np.zeros(negative_features.shape[0])
-
-            labeled_loss += cp.sum_squares((positive_features * w) - pos_y)
-            labeled_loss += cp.sum_squares((negative_features * w) - neg_y)
-
-            objective += 0.1 * (labeled_loss / (positive_features.shape[0] + negative_features.shape[0]))
+        print(constraints)
 
 
         prob = cp.Problem(cp.Minimize(objective), constraints=constraints)

@@ -3,9 +3,9 @@ import random
 from shutil import copyfile
 
 
-ROOT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ADE20K_merged"
+ROOT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\\imagenet_classes"
 
-OUTPUT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\new\\bicycling\\labeled_test"
+OUTPUT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\new\\stab\\labeled_test2"
 
 TRAIN_CLASSES = []
 
@@ -33,7 +33,7 @@ def main():
     if not os.path.exists(OUTPUT_PATH):
         os.makedirs(OUTPUT_PATH)
     relevant_dirs = get_relevant_dirs(ROOT_PATH, TRAIN_CLASSES)
-    subsample_from_dirs(relevant_dirs, OUTPUT_PATH, 5)
+    subsample_from_dirs(relevant_dirs, OUTPUT_PATH, 10)
 
 
 if __name__=="__main__":

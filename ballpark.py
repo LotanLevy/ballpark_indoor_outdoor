@@ -8,6 +8,7 @@ from affordance_tools.EntropyClassifier import EntropyClassifier
 from affordance_tools.BallparkClassifier_2 import BallparkClassifier2
 from affordance_tools.BallparkClassifier import BallparkClassifier
 from affordance_tools.OneClassRegressionModel import OneClassRegressionModel
+from affordance_tools.RegressionWithEntropy import RegressionWithEntropy
 # from affordance_tools.RegressionWithEntropy import RegressionWithEntropy
 
 from tensorflow.keras.applications import vgg16
@@ -29,7 +30,7 @@ def get_args_parser():
     parser.add_argument('--constraints_file', '-cf',  type=str, required=True)
     parser.add_argument('--train_root_path',  type=str, required=True)
     parser.add_argument('--val_root_path',  type=str, required=True)
-    parser.add_argument('--cls_method',  type=str, default="regress", choices=['oneclsregress', 'test', 'class', 'regress', 'regwithentropy', 'clswithentropy', 'class2'])
+    parser.add_argument('--cls_method',  type=str, default="regress", choices=['oneclsregress', 'test', 'class', 'regress', 'regwithentropy', 'clswithentropy', 'class2', 'regentr'])
     parser.add_argument('--features_level',  type=int, default=-2)
     parser.add_argument('--labeled_data_path',  type=str, default=None)
 
@@ -95,6 +96,8 @@ def get_ballpark_model(ballpark_type):
         ballpark_object = BallparkClassifier2
     elif ballpark_type == "regress":
         ballpark_object = RegressionModel
+    elif ballpark_type == "regentr":
+        ballpark_object = RegressionWithEntropy
     elif ballpark_type == "clswithentropy":
         ballpark_object = EntropyClassifier
     elif ballpark_type == "oneclsregress":
