@@ -178,6 +178,10 @@ def main():
         all_bounds = get_all_bounds(args.src_path)
         write_bounds_into_file(all_bounds, dest_file)
     elif args.create_auto_constraints:
+        print(os.path.dirname(args.dest_path))
+        if not os.path.exists(os.path.dirname(args.dest_path)):
+            print("create directory " + os.path.dirname(args.dest_path))
+            os.makedirs(os.path.dirname(args.dest_path))
         # creates constraints from split dir
         labels_map = {args.pos_label: 1, args.neg_label: 0}
         true_indoor_percent = get_indoor_size(args.src_path, labels_map)
@@ -186,6 +190,8 @@ def main():
         all_bounds = {**bounds, **diff_bounds}
         write_bounds(all_bounds, args.dest_path)
     elif args.parse_crowd:
+        if not os.path.exists(args.dest_path):
+            os.makedirs(args.dest_path)
         true_positive_percent_for_action = parse_crowd_data(args.src_path, args.data_path)
         for action in true_positive_percent_for_action:
             bounds = create_lower_and_upper_bounds(true_positive_percent_for_action[action], args.auto_eps)

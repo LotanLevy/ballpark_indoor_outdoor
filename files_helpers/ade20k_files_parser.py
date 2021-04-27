@@ -36,10 +36,10 @@ def build_sub_classes_from_root(root_path, dest, sub_cls2label):
 
 ##### train
 
-root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\small_stab\\train75"
-dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\small_stab\\train75_binary"
-sub_cls2label = {"cant": "0", "can": "1"}
-build_sub_classes_from_root(root, dest, sub_cls2label)
+# root = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\small_stab\\train75"
+# dest = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\small_stab\\train75_binary"
+# sub_cls2label = {"cant": "0", "can": "1"}
+# build_sub_classes_from_root(root, dest, sub_cls2label)
 
 
 

@@ -248,6 +248,7 @@ class Evaluator:
 
         pred_labels = get_classification_by_values(self.positive_val, self.negative_val, scores, self.values["threshold"])
         tn, fp, fn, tp = confusion_matrix(labels, pred_labels).ravel()
+        print(tn, fp, fn, tp)
         sum_data = fp + fn + tp + tn
 
         accuracy = (tp + tn) / sum_data

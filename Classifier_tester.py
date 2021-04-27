@@ -118,7 +118,11 @@ def main():
     evaluator = Evaluator(args.positive_label, args.negative_label, classify_mode=args.classify_mode)
     columns_names = evaluator.get_titles()
 
+    print(models)
+
     for name in models:
+
+        print("name")
         pred_func = models[name]
         scores = pred_func(X)
 
@@ -131,6 +135,11 @@ def main():
         else:
             print("illegal model type - {}".format(name))
             threshold = None
+
+
+        print(name)
+
+
 
 
         models_evaluations[name] = evaluator.evaluate(scores, y, threshold)

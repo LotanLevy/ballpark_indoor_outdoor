@@ -56,7 +56,10 @@ def get_pred(w, b, X):
 
 
 def parse_weights_paths(models_args):
-    ballpark_paths = [str(item) for item in models_args.split(',')]
+    if "," in models_args:
+        ballpark_paths = [str(item) for item in models_args.split(',')]
+    else:
+        ballpark_paths = [models_args]
     weights = dict()
 
     for ckpt_path in ballpark_paths:
