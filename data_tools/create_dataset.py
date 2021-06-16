@@ -3,9 +3,9 @@ import random
 from shutil import copyfile
 
 
-ROOT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\\imagenet_classes"
+ROOT_PATH = "C:\\Users\\lotan\\Documents\\studies\\Affordances\\datasets\\256_ObjectCategories"
 
-OUTPUT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\new\\stab\\labeled_test2"
+OUTPUT_PATH = "C:\\Users\\lotan\\Documents\\studies\\phoenix\\datasets\\ballpark_datasets\\new\\contain\\labeled_test"
 
 TRAIN_CLASSES = []
 

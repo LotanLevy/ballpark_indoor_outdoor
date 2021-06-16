@@ -20,6 +20,7 @@ from sklearn.metrics import confusion_matrix
 def get_args_parser():
     parser = argparse.ArgumentParser(description='Process constraint collector args.')
     parser.add_argument('--test_data_path',  type=str, required=True)
+    parser.add_argument('--classes_test', action="store_true")
     parser.add_argument('--classify_mode',  action="store_true")
 
 
@@ -101,6 +102,9 @@ def write_paths2scores(paths, scores, path):
 
 
 
+
+
+
 def main():
     args = get_args_parser().parse_args()
     if not os.path.exists(args.output_path):
@@ -109,26 +113,22 @@ def main():
     preprocessing_func = get_preprocessing_func_by_name(args.nn_model)
     nn_model = get_features_model(args.nn_model, args.input_size, args.features_level)
 
-    dataloader = Dataloader(nn_model, args.test_data_path, 1, args.input_size, 0, preprocess_func=preprocessing_func)
-    X, y, paths = get_binary_labels_and_data(dataloader, args.positive_label, args.negative_label)
-    if args.clear_test and args.constraints_file is not None:
-        X, y, paths = clear_data_by_constraints_bags(args.constraints_file, X, y, paths)
-
     models_evaluations = dict()
+    evaluations_on_classes = dict()
     evaluator = Evaluator(args.positive_label, args.negative_label, classify_mode=args.classify_mode)
     columns_names = evaluator.get_titles()
 
     print(models)
 
+
+    if args.classes_test:
+        paths = [(file_name, os.path.join(args.test_data_path, file_name)) for file_name in os.listdir(args.test_data_path)]
+    else:
+        paths = [("all", args.test_data_path)]
+
     for name in models:
-
         print("name")
-        pred_func = models[name]
-        scores = pred_func(X)
-
-        if not args.classify_mode:
-            threshold = get_roc_threshold(scores, y)
-        elif "ballpark" in name:
+        if "ballpark" in name:
             threshold = args.ballpark_threshold
         elif "svm" in name:
             threshold = 0.0
@@ -136,24 +136,48 @@ def main():
             print("illegal model type - {}".format(name))
             threshold = None
 
+        pred_func = models[name]
+        all_scores, all_y, all_threshold, all_paths = np.array([]), np.array([]), np.array([]), []
+        model_evaluations_on_class = dict()
+        model_output_path = os.path.join(args.output_path, name)
 
-        print(name)
+        for cls_name, path in paths:
+            dataloader = Dataloader(nn_model, path, 1, args.input_size, 0, preprocess_func=preprocessing_func)
+            X, y, paths = get_binary_labels_and_data(dataloader, args.positive_label, args.negative_label)
+            if args.clear_test and args.constraints_file is not None:
+                X, y, paths = clear_data_by_constraints_bags(args.constraints_file, X, y, paths)
 
 
+            scores = pred_func(X)
+
+            if not args.classify_mode:
+                threshold = get_roc_threshold(scores, y)
 
 
-        models_evaluations[name] = evaluator.evaluate(scores, y, threshold)
+            all_scores = np.concatenate([all_scores, scores])
+            all_y = np.concatenate([all_y, y])
+            all_paths += paths
 
-        tn_paths, fp_paths, fn_paths, tp_paths = get_paths_of_confusion_matrix(paths, scores, y, evaluator)
+            model_evaluations_on_class[cls_name] = evaluator.evaluate(scores, y, threshold)
+
+        save_evaluations(model_evaluations_on_class, model_output_path)
+        evaluations_on_classes[name] = model_evaluations_on_class
+
+        if not args.classify_mode:
+            threshold = get_roc_threshold(all_scores, all_y)
+
+        models_evaluations[name] = evaluator.evaluate(all_scores, all_y, threshold)
+
+        tn_paths, fp_paths, fn_paths, tp_paths = get_paths_of_confusion_matrix(all_paths, all_scores, all_y, evaluator)
         fn_maximal_paths, fn_scores = select_paths_by_number(fn_paths, 30, position="max")# creative thinking
         fp_maximal_paths, fp_scores = select_paths_by_number(fp_paths, 30, position="max")# wrong classifications
         fn_image = vh.build_image(list(fn_maximal_paths), ["{} {}".format("%.2f" % score_cls[0], score_cls[1]) for score_cls in list(zip(fn_scores, parse_classes_from_paths(fn_maximal_paths)))], 10, 448)
         fp_image = vh.build_image(list(fp_maximal_paths), ["{} {}".format("%.2f" % score_cls[0], score_cls[1]) for score_cls in list(zip(fp_scores, parse_classes_from_paths(fp_maximal_paths)))], 10, 448)
-        write_paths2scores(fn_maximal_paths, fn_scores, os.path.join(args.output_path, "{}_fn.txt".format(name)))
-        write_paths2scores(fp_maximal_paths, fp_scores, os.path.join(args.output_path, "{}_fp.txt".format(name)))
+        write_paths2scores(fn_maximal_paths, fn_scores, os.path.join(model_output_path, "{}_fn.txt".format(name)))
+        write_paths2scores(fp_maximal_paths, fp_scores, os.path.join(model_output_path, "{}_fp.txt".format(name)))
 
-        vh.display_images_of_image(fn_image, 448, 4, "{}_fn_with_maximal_scores".format(name), args.output_path)
-        vh.display_images_of_image(fp_image, 448, 4, "{}_fp_with_maximal_scores".format(name), args.output_path)
+        vh.display_images_of_image(fn_image, 448, 4, "{}_fn_with_maximal_scores".format(name), model_output_path)
+        vh.display_images_of_image(fp_image, 448, 4, "{}_fp_with_maximal_scores".format(name), model_output_path)
 
 
 

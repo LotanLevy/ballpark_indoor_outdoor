@@ -17,16 +17,16 @@ def get_args_parser():
 
     return parser
 
-def copy_cls2dir(cls_path, dir_path):
+def copy_cls2dir(cls_path, dir_path, cls_name):
     for filename in os.listdir(cls_path):
         file = os.path.join(cls_path, filename)
         if os.path.isdir(file):
             for inner_filename in os.listdir(file):
                 inner_file = os.path.join(file, inner_filename)
-                new_file_path = os.path.join(dir_path, inner_filename)
+                new_file_path = os.path.join(dir_path, cls_name +"#"+inner_filename)
                 copyfile(inner_file, new_file_path)
         else:
-            new_file_path = os.path.join(dir_path, filename)
+            new_file_path = os.path.join(dir_path, cls_name +"#"+filename)
             copyfile(file, new_file_path)
 
 
@@ -50,11 +50,11 @@ def main():
         if cls in positive_classes:
             positive_path = os.path.join(args.output_path, "1")
             print("copy cls {} to pos".format(cls))
-            copy_cls2dir(cls_path, positive_path)
+            copy_cls2dir(cls_path, positive_path, cls)
         elif cls in negative_classes:
             print("copy cls {} to neg".format(cls))
             positive_path = os.path.join(args.output_path, "0")
-            copy_cls2dir(cls_path, positive_path)
+            copy_cls2dir(cls_path, positive_path, cls)
 
 
 

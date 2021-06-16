@@ -13,7 +13,10 @@ import random
 from scipy.optimize import brentq
 from scipy.interpolate import interp1d
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import auc
 import csv
+from sklearn.metrics import precision_recall_curve
+
 
 
 
@@ -242,9 +245,13 @@ class Evaluator:
         self.values = dict()
         self.values["threshold"] = threshold
         if not self.classify_mode:
-            auc, eer = get_auc_eer(scores, labels)
-            self.values["auc"] = auc
+            auc_score_old, eer = get_auc_eer(scores, labels)
+            self.values["auc"] = auc_score_old
             self.values["eer"] = eer
+
+            precision, recall, _ = precision_recall_curve(labels, scores)
+            auc_score = auc(recall, precision)
+            print("auc_score", auc_score)
 
         pred_labels = get_classification_by_values(self.positive_val, self.negative_val, scores, self.values["threshold"])
         tn, fp, fn, tp = confusion_matrix(labels, pred_labels).ravel()
@@ -270,15 +277,31 @@ class Evaluator:
 
 
 def get_paths_of_confusion_matrix(paths, scores, labels, evaluator):
-    tn_paths, fp_paths, fn_paths, tp_paths = dict(), dict(), dict(), dict()
     pred_labels = get_classification_by_values(evaluator.positive_val, evaluator.negative_val, scores, evaluator.values["threshold"])
 
+    return get_paths_of_confusion_matrix(paths, pred_labels, labels, scores, evaluator.negative_val, evaluator.positive_val)
+
+    # for pred, label, path, score in zip(pred_labels, labels, paths, scores):
+    #     if pred == evaluator.negative_val and label == evaluator.negative_val:
+    #         tn_paths[path] = score
+    #     elif pred == evaluator.positive_val and label == evaluator.negative_val:
+    #         fp_paths[path] = score
+    #     elif pred == evaluator.negative_val and label == evaluator.positive_val:
+    #         fn_paths[path] = score
+    #     else:
+    #         tp_paths[path] = score
+    # return tn_paths, fp_paths, fn_paths, tp_paths
+
+
+def get_paths_of_confusion_matrix_with_pred_labels(paths, pred_labels, labels, scores, negative_val,positive_val):
+    tn_paths, fp_paths, fn_paths, tp_paths = dict(), dict(), dict(), dict()
+
     for pred, label, path, score in zip(pred_labels, labels, paths, scores):
-        if pred == evaluator.negative_val and label == evaluator.negative_val:
+        if pred == negative_val and label == negative_val:
             tn_paths[path] = score
-        elif pred == evaluator.positive_val and label == evaluator.negative_val:
+        elif pred == positive_val and label == negative_val:
             fp_paths[path] = score
-        elif pred == evaluator.negative_val and label == evaluator.positive_val:
+        elif pred == negative_val and label == positive_val:
             fn_paths[path] = score
         else:
             tp_paths[path] = score
